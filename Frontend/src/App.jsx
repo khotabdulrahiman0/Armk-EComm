@@ -9,6 +9,7 @@ import Profile from './pages/Profile';
 import CollectionPage from './pages/CollectionPage';
 import ProductDetails from './components/Products/ProductDetails';
 import Checkout from './components/Cart/Checkout';
+import RazorpayCheckout from './components/Cart/RazorpayCheckout';
 
 const App = () => {
   return (
@@ -23,6 +24,8 @@ const App = () => {
         <Route path='/checkout'element={<Checkout/>}/>
         <Route path='/collections/:collection' element={<CollectionPage />}/>
         <Route path='/product/:id' element={<ProductDetails />}/>
+        <Route path="/checkout/razorpay" element={<RazorpayCheckout />} />
+
 
           {/* User Layout */}
         </Route>

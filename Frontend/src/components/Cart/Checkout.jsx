@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PayPalButton from './PayPalButton';
+import RazorpayButton from './RazorpayButton';
+
+
 
 const cart = {
+    
     products: [
         {
             name: "Product 1",
             size: "M",
             color: "Blue",
             price: 120,
-            image: [{ url: "https://picsum.photos/500/500?random=1" }]
+            image: [{ url: "https://picsum.photos/500/500?random=2" }]
         },
         {
             name: "Product 2",
             size: "L",
             color: "Red",
             price: 75,
-            image: [{ url: "https://picsum.photos/500/500?random=2" }]
+            image: [{ url: "https://picsum.photos/500/500?random=1" }]
         },
     ],
     totalPrice: 195,
@@ -24,6 +28,7 @@ const cart = {
 
 const Checkout = () => {
     const [checkoutId, setCheckoutId] = useState(null);
+    const [paymentMethod, setPaymentMethod] = useState(null);
     const navigate = useNavigate();
     const [shippingAddress, setShippingAddress] = useState({
         firstName: "",
@@ -74,15 +79,29 @@ const Checkout = () => {
                             <button type='submit' className='w-full bg-black text-white py-3 rounded-md font-semibold text-lg hover:bg-gray-900'>Continue to Payment</button>
                         ) : (
                             <div>
-                                <h3 className='text-lg font-semibold mb-4'>Pay with PayPal</h3>
-                                <PayPalButton amount={cart.totalPrice} onSuccess={handlePaymentSuccess} onError={(err) => alert("Payment failed. Try again", err)} />
+                                <h3 className='text-lg font-semibold mb-4'>Choose Payment Method</h3>
+                                <div className="flex flex-col space-y-3">
+                                    {/* Razorpay for India */}
+                                    <button 
+                                        onClick={() => setPaymentMethod("razorpay")} 
+                                        className={`w-full py-3 rounded-md font-semibold text-lg ${paymentMethod === "razorpay" ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}>
+                                        Pay with Razorpay (India)
+                                    </button>
+
+                                    {/* PayPal for Global */}
+                                    <button 
+                                        onClick={() => setPaymentMethod("paypal")} 
+                                        className={`w-full py-3 rounded-md font-semibold text-lg ${paymentMethod === "paypal" ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}>
+                                        Pay with PayPal (Global)
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
                 </form>
             </div>
 
-            {/* Right Section - Order Summary */}
+            {/* Right Section - Order Summary & Payment */}
             <div className="bg-gray-50 shadow-lg rounded-lg p-6">
                 <h3 className='text-lg font-semibold mb-4 text-gray-800'>Order Summary</h3>
                 <div className="space-y-4 border-b pb-4">
@@ -112,6 +131,16 @@ const Checkout = () => {
                         <p>Total:</p>
                         <p>${cart.totalPrice.toLocaleString()}</p>
                     </div>
+                </div>
+
+                {/* Render Payment Method */}
+                <div className="mt-6">
+                    {paymentMethod === "paypal" && (
+                        <PayPalButton amount={cart.totalPrice} onSuccess={handlePaymentSuccess} onError={() => alert("PayPal Payment Failed")} />
+                    )}
+                    {paymentMethod === "razorpay" && (
+                        <RazorpayButton amount={cart.totalPrice} onSuccess={handlePaymentSuccess} onError={() => alert("Razorpay Payment Failed")} />
+                    )}
                 </div>
             </div>
         </div>

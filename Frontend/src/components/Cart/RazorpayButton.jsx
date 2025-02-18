@@ -3,7 +3,7 @@ import React from 'react';
 const RazorpayButton = ({ amount, onSuccess, onError }) => {
   const handlePayment = () => {
     const options = {
-      key: "rzp_test_lNwdtsMQ1UmV5A",
+      key: import.meta.env.VITE_RAZORPAY_KEY,
       amount: amount * 100, // Convert to paise
       currency: "INR",
       name: "Your Company",

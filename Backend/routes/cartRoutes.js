@@ -186,9 +186,9 @@ try {
     }else{
         if(userCart){
             //Guest cart has been already merged, return user cart
-            return res.status(200).json(userCart)
+            return res.status(200).json(userCart);
         }
-        res.status(404).json({msg:"Guest cart not found"})
+        res.status(404).json({msg:"Guest cart not found"});
     }
 
 } catch (error) {

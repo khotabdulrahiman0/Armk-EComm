@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductDetails, fetchSimilarProduct } from '../../redux/slices/productSlice';
 import { addToCart } from '../../redux/slices/cartSlice';
+import tinycolor from 'tinycolor2'; // Import tinycolor2
 
 const ProductDetails = ({ productId }) => {
   const { id } = useParams();
@@ -60,6 +61,12 @@ const ProductDetails = ({ productId }) => {
       .finally(() => setIsButtonDisabled(false));
   };
 
+  // Helper function to normalize and validate colors using tinycolor2
+  const getValidColor = (color) => {
+    const normalizedColor = tinycolor(color);
+    return normalizedColor.isValid() ? normalizedColor.toHexString() : '#cccccc'; // Fallback to a default color
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -95,17 +102,23 @@ const ProductDetails = ({ productId }) => {
               <div className="mb-4">
                 <p className="text-gray-700">Color:</p>
                 <div className="flex gap-2 mt-2">
-                  {selectedProduct.colors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`w-10 h-10 rounded-full border-2 border-gray-400 flex items-center justify-center transition-all ${
-                        selectedColor === color ? 'ring-2 ring-black' : ''
-                      }`}
-                    >
-                      <div className="w-8 h-8 rounded-full" style={{ backgroundColor: color.toLowerCase() }}></div>
-                    </button>
-                  ))}
+                  {selectedProduct.colors.map((color) => {
+                    const validColor = getValidColor(color); // Get a valid CSS color
+                    return (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-10 h-10 rounded-full border-2 border-gray-400 flex items-center justify-center transition-all ${
+                          selectedColor === color ? 'ring-2 ring-black' : ''
+                        }`}
+                      >
+                        <div
+                          className="w-8 h-8 rounded-full"
+                          style={{ backgroundColor: validColor }} // Use the valid color
+                        ></div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

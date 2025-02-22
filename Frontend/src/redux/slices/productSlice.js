@@ -50,11 +50,11 @@ const productSlice = createSlice({
   name: "products",
   initialState: {
     products: [],
-    selectedProduct: null, // Store the details of a single product
+    selectedProduct: null,
     similarProducts: [],
     loading: false,
     error: null,
-    filters: {  // ✅ Fixed typo from "fliters" to "filters"
+    filters: {  
       category: "",
       size: "",
       color: "",
@@ -126,7 +126,7 @@ const productSlice = createSlice({
       .addCase(updateProduct.fulfilled, (state, action) => {
         state.loading = false;
         const updatedProduct = action.payload;
-        const index = state.products.findIndex((product) => product._id === updatedProduct._id);  // ✅ Fixed incorrect update logic
+        const index = state.products.findIndex((product) => product._id === updatedProduct._id);  
         if (index !== -1) {
           state.products[index] = updatedProduct;
         }
@@ -143,7 +143,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchSimilarProduct.fulfilled, (state, action) => {
         state.loading = false;
-        state.similarProducts = action.payload;  // ✅ Fixed: now setting `similarProducts` instead of `products`
+        state.similarProducts = action.payload;  
       })
       .addCase(fetchSimilarProduct.rejected, (state, action) => {
         state.loading = false;

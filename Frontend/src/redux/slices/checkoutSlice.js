@@ -2,7 +2,7 @@ import { createSlice , createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // async thunk to create a checkout session
-export const creatCheckout = createAsyncThunk("checkout/createCheckout",async (checkoutData, {rejectWithValue}) =>{
+export const createCheckout = createAsyncThunk("checkout/createCheckout",async (checkoutData, {rejectWithValue}) =>{
     try {
         const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/checkout`,checkoutData,
             {
@@ -27,15 +27,15 @@ const checkoutSlice = createSlice({
     reducers:{},
     extraReducers:(builder)=>{
         builder
-        .addCase(creatCheckout.pending, (state)=>{
+        .addCase(createCheckout.pending, (state)=>{
             state.loading = true,
             state.error = null
         })
-        .addCase(creatCheckout.fulfilled, (state,action)=>{
+        .addCase(createCheckout.fulfilled, (state,action)=>{
             state.loading = false,
             state.checkout = action.payload; 
         })
-        .addCase(creatCheckout.rejected, (state, action)=>{
+        .addCase(createCheckout.rejected, (state, action)=>{
             state.loading = false,
             state.error = action.payload.message;
         })

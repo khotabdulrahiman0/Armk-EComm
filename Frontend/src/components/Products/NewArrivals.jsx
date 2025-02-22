@@ -82,15 +82,15 @@ const NewArrivals = () => {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {newArrivals.map((product) => (
-            <div key={product.productId} className="min-w-[70%] sm:min-w-[45%] lg:min-w-[30%] relative">
+            <div key={product._id} className="min-w-[70%] sm:min-w-[45%] lg:min-w-[30%] relative">
               <img className="w-full h-[250px] sm:h-[300px] object-cover rounded-lg shadow-lg" src={product.images?.[0]?.url} alt={product.name} />
               <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-3 rounded-b-lg">
-                <Link to={`/product/${product.productId}`} className="block">
+                <Link to={`/product/${product._id}`} className="block">
                   <h4 className="font-medium text-sm sm:text-base">{product.name}</h4>
                   <p className="text-sm sm:text-base">${product.price}</p>
                 </Link>
               </div>
-            </div>
+            </div>  
           ))}
         </div>
 

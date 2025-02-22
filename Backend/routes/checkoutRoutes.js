@@ -1,4 +1,4 @@
-const express = require('express')
+const express = require('express');
 const Cart = require("../models/cart");
 const Checkout = require("../models/Checkout");
 const Product = require("../models/products");
@@ -7,44 +7,53 @@ const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// checkout route
-router.post("/",protect,async (req,res) => {
-    const {checkoutItems, shippingAddress, paymentMethod, totalPrice} = req.body
+// Checkout route
+router.post("/", protect, async (req, res) => {
+    const { checkoutItems, shippingAddress, paymentMethod, totalPrice } = req.body;
 
-    if(!checkoutItems || checkoutItems.length === 0){
-        return res.status(400).json({msg:"No items in checkout"});
+    if (!checkoutItems || checkoutItems.length === 0) {
+        return res.status(400).json({ msg: "No items in checkout" });
     }
 
     try {
-        //create a checkot session
+        // Create a checkout session
         const newCheckout = await Checkout.create({
-            user:req.user._id,
-            checkoutItems:checkoutItems,
+            user: req.user._id,
+            checkoutItems: checkoutItems.map(item => ({
+                productId: item.productId,
+                name: item.name,
+                image: item.image,
+                price: item.price,
+                quantity: item.quantity,
+                size: item.size || "N/A", // Ensure size is included
+                color: item.color || "N/A" // Ensure color is included
+            })),
             shippingAddress,
             paymentMethod,
             totalPrice,
-            paymentStatus:"Pending",
+            paymentStatus: "Pending",
             isPaid: false,
         });
+
         console.log(`Checkout created for user: ${req.user._id}`);
         res.status(201).json(newCheckout);
-        
     } catch (error) {
-        console.log("checkout session creating err",error)
-        res.status(500).json({msg:"Server error"})
+        console.log("Checkout session creating error", error);
+        res.status(500).json({ msg: "Server error" });
     }
-})
+});
 
-// pay route
-router.put("/:id/pay",protect,async (req,res) => {
-    const {paymentStatus,paymentDetails } = req.body;
+// Payment route
+router.put("/:id/pay", protect, async (req, res) => {
+    const { paymentStatus, paymentDetails } = req.body;
     try {
-        const checkout = await Checkout.findById(req.params.id) 
+        const checkout = await Checkout.findById(req.params.id);
 
-        if(!checkout){
-            return res.status(404).json({msg:"No checkout found."})
+        if (!checkout) {
+            return res.status(404).json({ msg: "No checkout found." });
         }
-        if(paymentStatus === "paid"){
+
+        if (paymentStatus === "paid") {
             checkout.isPaid = true;
             checkout.paymentStatus = paymentStatus;
             checkout.paymentDetails = paymentDetails;
@@ -52,30 +61,40 @@ router.put("/:id/pay",protect,async (req,res) => {
             await checkout.save();
 
             res.status(201).json(checkout);
-        }else{
-            res.status(400).json({msg:"invalid payment status."});
+        } else {
+            res.status(400).json({ msg: "Invalid payment status." });
         }
-
     } catch (error) {
-        console.log("pay err",error)
-        res.status(500).json({msg:"Server error"})
+        console.log("Payment error", error);
+        res.status(500).json({ msg: "Server error" });
     }
-})
+});
 
-// finalize route
-router.post("/:id/finalize",protect,async (req,res) => {
+// Finalize order route
+router.post("/:id/finalize", protect, async (req, res) => {
     try {
         const checkout = await Checkout.findById(req.params.id);
 
-        if(!checkout){
-            return res.status(404).json({msg:"Checkout not found"})
+        if (!checkout) {
+            return res.status(404).json({ msg: "Checkout not found" });
         }
 
-        if(checkout.isPaid && !checkout.isFinalized){
-            // create a final order
+        if (checkout.isPaid && !checkout.isFinalized) {
+            // Ensure order items include size & color
+            const finalOrderItems = checkout.checkoutItems.map(item => ({
+                productId: item.productId,
+                name: item.name,
+                image: item.image,
+                price: item.price,
+                quantity: item.quantity,
+                size: item.size || "N/A",  // Ensure size is passed
+                color: item.color || "N/A" // Ensure color is passed
+            }));
+
+            // Create a final order
             const finalOrder = await Order.create({
                 user: checkout.user,
-                orderItems: checkout.checkoutItems,
+                orderItems: finalOrderItems,
                 shippingAddress: checkout.shippingAddress,
                 paymentMethod: checkout.paymentMethod,
                 totalPrice: checkout.totalPrice,
@@ -86,23 +105,24 @@ router.post("/:id/finalize",protect,async (req,res) => {
                 paymentDetails: checkout.paymentDetails
             });
 
-            // mark the checkout as finalized
+            // Mark the checkout as finalized
             checkout.isFinalized = true;
             checkout.finalizedAt = Date.now();
             await checkout.save();
-            // delete the user cart to cleanUp
-            await Cart.findOneAndDelete({user:checkout.user})
-            res.status(201).json(finalOrder)
-        }else if(checkout.isFinalized){
-            res.status(400).json({msg:"checkout already finalized"})
-        }else{
-            res.status(400).json({msg:"checkout is not paid"})
+
+            // Delete the user's cart to clean up
+            await Cart.findOneAndDelete({ user: checkout.user });
+
+            res.status(201).json(finalOrder);
+        } else if (checkout.isFinalized) {
+            res.status(400).json({ msg: "Checkout already finalized" });
+        } else {
+            res.status(400).json({ msg: "Checkout is not paid" });
         }
-
     } catch (error) {
-        console.log("pay finalize err",error)
-        res.status(500).json({msg:"Server error"})
+        console.log("Finalize order error", error);
+        res.status(500).json({ msg: "Server error" });
     }
-})
+});
 
-module.exports = router; 
+module.exports = router;

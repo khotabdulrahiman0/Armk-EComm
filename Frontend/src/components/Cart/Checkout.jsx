@@ -14,6 +14,9 @@ const Checkout = () => {
     const { cart, loading, error } = useSelector((state) => state.cart);
     const { user } = useSelector((state) => state.auth);
 
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+    if (!BACKEND_URL) console.error("Backend URL is missing!");
+
     const [shippingAddress, setShippingAddress] = useState({
         firstName: "",
         lastName: "",
@@ -26,38 +29,52 @@ const Checkout = () => {
 
     // Ensure cart is loaded before proceeding
     useEffect(() => {
-        if (!cart || !cart.products || cart.products.length === 0) {
+        if (!cart?.products?.length) {
             navigate("/");
         }
-    }, [cart, cart.products, navigate]);
+    }, [cart, navigate]);
 
     const handleCreateCheckout = async (e) => {
         e.preventDefault();
-        if (cart && cart.products.length > 0) {
+
+        // Validate required fields
+        if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.phone) {
+            alert("Please fill all required fields.");
+            return;
+        }
+
+        if (cart?.products?.length > 0) {
             const res = await dispatch(
                 createCheckout({
-                    checkoutItems: cart.products,
+                    checkoutItems: cart.products.map(item => ({
+                        ...item,
+                        size: item.size || "N/A",
+                        color: item.color || "N/A"
+                    })),
                     shippingAddress,
                     paymentMethod: "PayPal",
                     totalPrice: cart.totalPrice,
                 })
             );
 
-            if (res.payload && res.payload._id) {
+            if (res.payload?._id) {
                 setCheckoutId(res.payload._id); // Set checkout ID if checkout is successful
             }
         }
     };
 
     const handlePaymentSuccess = async (details) => {
+        if (!checkoutId) {
+            console.error("Checkout ID is missing.");
+            return;
+        }
+
         try {
-            const response = await axios.put(
-                `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/pay`,
+            await axios.put(
+                `${BACKEND_URL}/api/checkout/${checkoutId}/pay`,
                 { paymentStatus: "paid", paymentDetails: details },
                 {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    },
+                    headers: { Authorization: `Bearer ${localStorage.getItem("userToken")}` },
                 }
             );
             await handleFinalizeCheckout(checkoutId);
@@ -73,13 +90,11 @@ const Checkout = () => {
         }
 
         try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${id}/finalize`,
+            await axios.post(
+                `${BACKEND_URL}/api/checkout/${id}/finalize`,
                 {},
                 {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    },
+                    headers: { Authorization: `Bearer ${localStorage.getItem("userToken")}` },
                 }
             );
             navigate('/order-confirmation');
@@ -90,9 +105,7 @@ const Checkout = () => {
 
     if (loading) return <p>Loading cart...</p>;
     if (error) return <p>Error: {error}</p>;
-    if (!cart || !cart.products || cart.products.length === 0) {
-        return <p>Your cart is empty</p>;
-    }
+    if (!cart?.products?.length) return <p>Your cart is empty</p>;
 
     return (
         <div className='max-w-6xl mx-auto py-10 px-6 grid grid-cols-1 lg:grid-cols-2 gap-8'>
@@ -102,7 +115,7 @@ const Checkout = () => {
                 <form onSubmit={handleCreateCheckout}>
                     <div className='space-y-4'>
                         <h3 className='text-lg font-semibold text-gray-700'>Contact Details</h3>
-                        <input type="email" value={user ? user.email : ""} className='w-full p-3 border rounded bg-gray-100' disabled />
+                        <input type="email" value={user?.email || ""} className='w-full p-3 border rounded bg-gray-100' disabled />
 
                         <h3 className='text-lg font-semibold text-gray-700'>Shipping Address</h3>
                         <div className="grid grid-cols-2 gap-4">
@@ -134,16 +147,12 @@ const Checkout = () => {
             <div className="bg-gray-50 shadow-lg rounded-lg p-6">
                 <h3 className='text-lg font-semibold mb-4 text-gray-800'>Order Summary</h3>
 
-                {/* List of Cart Items */}
+                {/* Cart Items */}
                 <div className="space-y-4">
                     {cart.products.map((item) => (
                         <div key={item._id} className="flex justify-between items-center border-b pb-4">
                             <div className="flex items-center space-x-4">
-                                <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className="w-16 h-16 object-cover rounded"
-                                />
+                                <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
                                 <div>
                                     <p className="text-gray-800 font-medium">{item.name}</p>
                                     <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
@@ -154,38 +163,10 @@ const Checkout = () => {
                     ))}
                 </div>
 
-                {/* Subtotal, Shipping, and Total */}
-                <div className="mt-6 space-y-3">
-                    <div className="flex justify-between">
-                        <p className="text-gray-600">Subtotal</p>
-                        <p className="text-gray-800 font-medium">${cart.totalPrice.toFixed(2)}</p>
-                    </div>
-                    <div className="flex justify-between">
-                        <p className="text-gray-600">Shipping</p>
-                        <p className="text-gray-800 font-medium">Free</p>
-                    </div>
-                    <div className="flex justify-between border-t pt-3">
-                        <p className="text-gray-800 font-semibold">Total</p>
-                        <p className="text-gray-800 font-semibold">${cart.totalPrice.toFixed(2)}</p>
-                    </div>
-                </div>
-
                 {/* Payment Buttons */}
                 <div className="mt-6">
-                    {paymentMethod === "paypal" && (
-                        <PayPalButton
-                            amount={cart.totalPrice}
-                            onSuccess={handlePaymentSuccess}
-                            onError={() => alert("PayPal Payment Failed")}
-                        />
-                    )}
-                    {paymentMethod === "razorpay" && (
-                        <RazorpayButton
-                            amount={cart.totalPrice}
-                            onSuccess={handlePaymentSuccess}
-                            onError={() => alert("Razorpay Payment Failed")}
-                        />
-                    )}
+                    {paymentMethod === "paypal" && <PayPalButton amount={cart.totalPrice} onSuccess={handlePaymentSuccess} />}
+                    {paymentMethod === "razorpay" && <RazorpayButton amount={cart.totalPrice} onSuccess={handlePaymentSuccess} />}
                 </div>
             </div>
         </div>

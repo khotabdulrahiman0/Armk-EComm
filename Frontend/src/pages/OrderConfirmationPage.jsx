@@ -1,102 +1,161 @@
-import React from 'react'
-
-const checkout = {
-    _id:"123123",
-    createdAt: new Date(),
-    checkoutItems:[
-        {
-            productId:"1",
-            name:"Jacket",
-            color:"black",
-            size:"M",
-            price: 150,
-            quantity: 1,
-            image: "https://picsum.photos/500/500?random=1"
-        },
-        {
-            productId:"2",
-            name:"T-Shirt",
-            color:"blue",
-            size:"M",
-            price: 120,
-            quantity: 2,
-            image: "https://picsum.photos/500/500?random=2"
-        },
-    ],
-    shippingAddress:{
-        address:"123 Fashion Street ",
-        city: "New York",
-        country:"USA",
-
-    }
-}
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { clearCart } from "../redux/slices/cartSlice"
 
 const OrderConfirmationPage = () => {
-    const calculateEstimatedDelivery=(createdAt)=>{
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { checkout } = useSelector((state) => state.checkout);
+
+    useEffect(() => {
+        if (checkout && checkout._id) {
+            dispatch(clearCart());
+            localStorage.removeItem("cart");
+        } else {
+            navigate("/my-orders")
+        }
+    }, [checkout, dispatch, navigate])
+
+    const calculateEstimatedDelivery = (createdAt) => {
         const orderDate = new Date(createdAt)
-        orderDate.setDate(orderDate.getDate()+10); // added 10 day to order date
+        orderDate.setDate(orderDate.getDate() + 10);
         return orderDate.toLocaleDateString();
     }
-  return (
-    <div className='max-w-4xl mx-auto p-6 bg-white'> 
-        <h1 className='text-4xl font-bold text-center text-emerald-700 mb-8 '>
-            Thank You for Your Order!
-        </h1>
 
-        {checkout && <div className='p-6 rounded-lg border '>
-            <div className="flex justify-between mb-20">
-                {/* Order Id and Date */}
-                <div>
-                    <h2 className='text-xl font-semibold '>
-                        Order Id: {checkout._id}
-                    </h2>
-                    <p className='text-gray-500 '>
-                        Order Date: {new Date(checkout.createdAt).toLocaleDateString()}
+    return (
+        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto">
+                {/* Header Section */}
+                <div className="text-center mb-12">
+                    <div className="mx-auto h-20 w-20 text-green-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h1 className="mt-4 text-4xl font-extrabold text-gray-900">
+                        Order Confirmed!
+                    </h1>
+                    <p className="mt-2 text-lg text-gray-600">
+                        Thank you for your purchase. We've sent a confirmation email with your order details.
                     </p>
                 </div>
-                {/* Estimated delv */}
-                <div className="d">
-                    <p className='text-emerald-700 text-sm '>
-                        Estimate Delivery:{calculateEstimatedDelivery(checkout.createdAt)}
-                    </p>
-                </div>
-            </div>
-            <div className="mb-20">
-                {checkout.checkoutItems.map((item)=>(
-                    <div key={item.productId} className='flex items-center mb-4'>
-                        <img src={item.image} alt={item.name} className='w-16 h-16 object-cover rounded-md mr-4'/>
-                        <div>
-                            <h4 className='text-md font-semibold'>{item.name}</h4>
-                            <p className='text-sm text-gray-500'>
-                                {item.color} | {item.size}
-                            </p>
+
+                {/* Order Summary Card */}
+                {checkout && (
+                    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                        {/* Order Meta Section */}
+                        <div className="p-8 border-b border-gray-200">
+                            <div className="flex flex-col sm:flex-row justify-between gap-4">
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-500">Order Number</h3>
+                                    <p className="mt-1 text-lg font-semibold text-gray-900">{checkout._id}</p>
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-500">Order Date</h3>
+                                    <p className="mt-1 text-lg font-semibold text-gray-900">
+                                        {new Date(checkout.createdAt).toLocaleDateString()}
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <h3 className="text-sm font-medium text-gray-500">Est. Delivery</h3>
+                                    <p className="mt-1 text-lg font-semibold text-green-600">
+                                        {calculateEstimatedDelivery(checkout.createdAt)}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="ml-auto text-right ">
-                            <p className='text-md '>${item.price}</p>
-                            <p className='text-sm text-gray-500'>Qty:{item.quantity}</p>
+
+                        {/* Items List */}
+                        <div className="p-8 border-b border-gray-200">
+                            <h2 className="text-xl font-bold text-gray-900 mb-6">Order Items</h2>
+                            <div className="space-y-6">
+                                {checkout.checkoutItems.map((item) => (
+                                    <div key={item.productId} className="flex items-start">
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                                        />
+                                        <div className="ml-4 flex-1">
+                                            <h3 className="text-base font-medium text-gray-900">{item.name}</h3>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                {item.color} / {item.size}
+                                            </p>
+                                            <div className="mt-2 flex items-center text-sm text-gray-500">
+                                                <span>Qty: {item.quantity}</span>
+                                                <span className="mx-2">•</span>
+                                                <span>${item.price}</span>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-base font-medium text-gray-900">
+                                                ${(item.price * item.quantity).toFixed(2)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Info Grid */}
+                        <div className="p-8 bg-gray-50">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Payment Info */}
+                                <div className="bg-white p-6 rounded-lg shadow-sm">
+                                    <div className="flex items-center mb-4">
+                                        <div className="h-6 w-6 text-gray-500 mr-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-lg font-medium text-gray-900">Payment Information</h3>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-gray-600">Payment Method</p>
+                                        <p className="font-medium text-gray-900">PayPal</p>
+                                    </div>
+                                </div>
+
+                                {/* Shipping Info */}
+                                <div className="bg-white p-6 rounded-lg shadow-sm">
+                                    <div className="flex items-center mb-4">
+                                        <div className="h-6 w-6 text-gray-500 mr-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM3 16a4 4 0 018 0v4H3v-4zm12-4a4 4 0 014 4v4h-4v-4z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8h18M3 8v10h18V8m-18 0l3-4h12l3 4" />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-lg font-medium text-gray-900">Shipping Address</h3>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-gray-600">Delivery Address</p>
+                                        <p className="font-medium text-gray-900">
+                                            {checkout.shippingAddress.address},<br />
+                                            {checkout.shippingAddress.city}, {checkout.shippingAddress.country}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                ))}
-            </div>
-            {/* Payment and delivery info */}
-            <div className="grid grid-cols-2 gap-8 ">
-                <div>
-                    <h4 className='text-lg font-semibold mb-2 '>Payment</h4>
-                    <p className='text-gray-600 '>PayPal</p>
-                </div>
-                {/* delivery info*/}
-                <div>
-                    <h4 className='text-lg font-semibold mb-2'>
-                        Delivery
-                    </h4>
-                    <p className='text-gray-600 '>{checkout.shippingAddress.address}</p>
-                    <p className='text-gray-600'>{checkout.shippingAddress.city},{""}{checkout.shippingAddress.country}</p>
-                </div>
-            </div>
-        </div>}
+                )}
 
-    </div>
-  )
+                {/* CTA Section */}
+                <div className="mt-12 text-center">
+                    <button
+                        onClick={() => navigate('/')}
+                        className="inline-block px-8 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                        Continue Shopping
+                    </button>
+                    <p className="mt-4 text-sm text-gray-600">
+                        Need help? <a href="/contact" className="text-green-600 hover:underline">Contact support</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    )
 }
 
 export default OrderConfirmationPage

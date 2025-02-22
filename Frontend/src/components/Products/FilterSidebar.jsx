@@ -21,7 +21,7 @@ const FilterSidebar = () => {
     const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
     const materials = ['Cotton', 'Wool', 'Denim', 'Polyester', 'Silk', 'Linen', 'Viscose', 'Fleece'];
     const brands = ['Urban Threads', 'Modern Fit', 'Gucci', 'Street Style', 'Beach Breeze', 'Fashion Insta'];
-    const genders = ['Male', 'Female'];
+    const genders = ['Men', 'Women'];
 
     useEffect(() => {
         const params = Object.fromEntries([...searchParams]);

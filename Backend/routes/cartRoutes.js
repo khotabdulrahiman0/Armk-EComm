@@ -35,7 +35,7 @@ router.post("/", async (req, res) => {
                 cart.products.push({
                     productId,
                     name: product.name,
-                    image: product.image,
+                    image: product.images.length > 0 ? product.images[0].url : "", // Store the first image URL
                     price: parseFloat(product.price), // Ensure price is stored as a number
                     size,
                     color,
@@ -59,7 +59,7 @@ router.post("/", async (req, res) => {
                 products: [{
                     productId,
                     name: product.name,
-                    image: product.image,
+                    image: product.images.length > 0 ? product.images[0].url : "", // Store the first image URL
                     price: parseFloat(product.price), // Ensure price is stored as a number
                     size,
                     color,

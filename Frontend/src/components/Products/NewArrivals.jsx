@@ -1,20 +1,29 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState} from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import axios from "axios"
 
 const NewArrivals = () => {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const newArrivals = [
-    { productId: 1, name: "Blue T-shirt", price: 200, image: { url: "https://picsum.photos/500/500?random=8" } },
-    { productId: 2, name: "Black Shirt", price: 259, image: { url: "https://picsum.photos/500/500?random=9" } },
-    { productId: 3, name: "White Hoodie", price: 299, image: { url: "https://picsum.photos/500/500?random=10" } },
-    { productId: 4, name: "Denim Jacket", price: 499, image: { url: "https://picsum.photos/500/500?random=11" } },
-    { productId: 5, name: "Casual Sneakers", price: 350, image: { url: "https://picsum.photos/500/500?random=12" } },
-    { productId: 6, name: "Stylish Watch", price: 1200, image: { url: "https://picsum.photos/500/500?random=13" } },
-  ];
+  const [newArrivals,setNewArrivals] = useState([])
+
+  useEffect(()=>{
+    const fetchNewArrivals = async()=>{
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products/new-arrivals`);
+        console.log("API Response:", response.data); // Debugging
+
+        setNewArrivals(response.data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    fetchNewArrivals()
+  },[])
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -43,7 +52,7 @@ const NewArrivals = () => {
       if (container) container.removeEventListener("scroll", updateScrollButtons);
       window.removeEventListener("resize", updateScrollButtons);
     };
-  }, []);
+  }, [newArrivals]);
 
   return (
     <section className="relative px-4 sm:px-8">
@@ -74,7 +83,7 @@ const NewArrivals = () => {
         >
           {newArrivals.map((product) => (
             <div key={product.productId} className="min-w-[70%] sm:min-w-[45%] lg:min-w-[30%] relative">
-              <img className="w-full h-[250px] sm:h-[300px] object-cover rounded-lg shadow-lg" src={product.image.url} alt={product.name} />
+              <img className="w-full h-[250px] sm:h-[300px] object-cover rounded-lg shadow-lg" src={product.images?.[0]?.url} alt={product.name} />
               <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-3 rounded-b-lg">
                 <Link to={`/product/${product.productId}`} className="block">
                   <h4 className="font-medium text-sm sm:text-base">{product.name}</h4>

@@ -37,6 +37,10 @@ const AdminSidebar = () => {
                 <FaStore />
                 <span>Shop</span>
             </NavLink>
+            <NavLink to="/admin/products/add" className={({isActive}) => isActive ? "bg-gray-700 text-white py-3 px-4 rounded flex items-center space-x-2 " : "text-gray-300 hover:bg-gray-700 hover:text-white py-3 px-4 rounded flex items-center space-x-2 "}>
+    <FaBoxOpen />
+    <span>Add Product</span>
+</NavLink>
         </nav>
         <div className="mt-6">
             <button onClick={handleLogout} className='w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded flex items-center justify-center space-x-2'>

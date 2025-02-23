@@ -20,24 +20,30 @@ router.get("/",protect,admin,async (req,res) => {
 })
 
 // update orders
-router.put("/:id",protect,admin,async (req,res) => {
+router.put("/:id", protect, admin, async (req, res) => {
     try {
         const order = await Order.findById(req.params.id);
-        if(order){
-            order.status = req.body.status || order.status;
-            order.isDelivered = req.body.status === "Delivered" ? true : order.isDelivered;
-            order.deliveredAt = req.body.status === "Delivered" ? Date.now() : order.deliveredAt; 
-
-            const updatedOrder = await order.save();
-            res.json(updatedOrder)
-        }else{
-            res.status(404).json({msg:"No order found."})
+        if (!order) {
+            return res.status(404).json({ msg: "No order found." });
         }
+
+        // Update order status
+        if (req.body.status) {
+            order.status = req.body.status;
+            if (req.body.status === "Delivered") {
+                order.isDelivered = true;
+                order.deliveredAt = Date.now();
+            }
+        }
+
+        const updatedOrder = await order.save();
+        res.json(updatedOrder);
     } catch (error) {
-        console.log(error);
-        res.status(500).json({msg:"Internal Server Error."})
+        console.error(error);
+        res.status(500).json({ msg: "Internal Server Error." });
     }
-})
+});
+
 
 // delete order 
 router.delete("/:id",protect,admin,async (req,res) => {

@@ -4,7 +4,7 @@ const { protect , admin } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-//products
+//create products
 router.post("/",protect,admin, async (req, res) => {
     try {
         const {
@@ -59,34 +59,38 @@ router.post("/",protect,admin, async (req, res) => {
 });
 
 //update products
-router.put("/:id",protect,admin,async(req,res)=>{
+router.put("/:id", protect, admin, async (req, res) => {
     try {
-        const {
-            name,
-            description,
-            price,
-            discountPrice,
-            countInStock,
-            category,
-            brand,
-            sizes,
-            colors,
-            collections,
-            material,
-            genders,
-            images,
-            isFeatured,
-            isPublished,
-            tags,
-            dimensions,
-            weight,
-            sku,
-        } = req.body;
+        const productId = req.params.id;
+        console.log("Product ID:", productId); // Log the product ID
 
-        //find product by id
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findById(productId);
+        console.log("Product found:", product); // Log the product
 
-        if(product){
+        if (product) {
+            // Update product fields
+            const {
+                name,
+                description,
+                price,
+                discountPrice,
+                countInStock,
+                category,
+                brand,
+                sizes,
+                colors,
+                collections,
+                material,
+                genders,
+                images,
+                isFeatured,
+                isPublished,
+                tags,
+                dimensions,
+                weight,
+                sku,
+            } = req.body;
+
             product.name = name || product.name;
             product.description = description || product.description;
             product.price = price || product.price;
@@ -100,24 +104,23 @@ router.put("/:id",protect,admin,async(req,res)=>{
             product.material = material || product.material;
             product.genders = genders || product.genders;
             product.images = images || product.images;
-            product.isFeatured = isFeatured !==undefined ? isFeatured : product.isFeatured;
-            product.isPublished = isPublished !==undefined ? isPublished : product.isPublished;
+            product.isFeatured = isFeatured !== undefined ? isFeatured : product.isFeatured;
+            product.isPublished = isPublished !== undefined ? isPublished : product.isPublished;
             product.tags = tags || product.tags;
+            product.dimensions = dimensions || product.dimensions;
             product.weight = weight || product.weight;
             product.sku = sku || product.sku;
 
-            //save the updated products 
-            const updatedProduct =await product.save();
-            res.json(updatedProduct)
-        }else{
-            res.status(404).json({msg:"No product found"})
+            const updatedProduct = await product.save();
+            res.json(updatedProduct);
+        } else {
+            res.status(404).json({ msg: "Product not found" });
         }
     } catch (error) {
-        console.log("Updated err",error)
-        res.status(500).json({msg:"Server error"})
-
+        console.log("Update error:", error);
+        res.status(500).json({ msg: "Server error" });
     }
-})
+});
 
 // deleting product
 

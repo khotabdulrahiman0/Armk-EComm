@@ -30,22 +30,25 @@ export const addUser = createAsyncThunk("admin/addUser", async (userData, { reje
 });
 
 // Update user info
-export const updateUser = createAsyncThunk("admin/updateUser", async ({ id, name, email, role }, { rejectWithValue }) => {
-    try {
-        const response = await axios.put(
-            `${import.meta.env.VITE_BACKEND_URL}/api/admin/users/${id}`,
-            { email, name, role },
-            {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("userToken")}`
+export const updateUser = createAsyncThunk(
+    "admin/updateUser",
+    async ({ id, role }, { rejectWithValue }) => {
+        try {
+            const response = await axios.put(
+                `${import.meta.env.VITE_BACKEND_URL}/api/admin/users/${id}`,
+                { role }, // Send only role if updating role
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("userToken")}`
+                    }
                 }
-            }
-        );
-        return response.data;
-    } catch (error) {
-        return rejectWithValue(error.response.data);
+            );
+            return response.data.user;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
     }
-});
+);
 
 // Delete a user
 export const deleteUser = createAsyncThunk("admin/deleteUser", async (id, { rejectWithValue }) => {
@@ -105,9 +108,13 @@ const adminSlice = createSlice({
                 const updatedUser = action.payload;
                 const userIndex = state.users.findIndex((user) => user._id === updatedUser._id);
                 if (userIndex !== -1) {
-                    state.users[userIndex] = updatedUser;
+                    // Create a new users array with the updated user
+                    state.users = state.users.map((user, index) =>
+                        index === userIndex ? { ...user, role: updatedUser.role } : user
+                    );
                 }
             })
+            
             .addCase(updateUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || action.error.message;

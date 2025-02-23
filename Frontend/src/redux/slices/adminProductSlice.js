@@ -5,7 +5,7 @@ const API_URL = `${import.meta.env.VITE_BACKEND_URL}`;
 const USER_TOKEN = `Bearer ${localStorage.getItem("userToken")}`; 
 
 //to fetch admin products
-export const fetcAdminProducts = createAsyncThunk("adminProducts/fetchProducts",async()=>{
+export const fetchAdminProducts = createAsyncThunk("adminProducts/fetchProducts",async()=>{
     const response = await axios.get(`${API_URL}/api/admin/products`,{
         headers:{
             Authorization: USER_TOKEN,
@@ -25,18 +25,18 @@ export const createProduct = createAsyncThunk("adminProducts/createProducts",asy
 })
 
 // upadte a products
-export const upadateProduct = createAsyncThunk("adminProducts/updateProduct",async({id,productData})=>{
-    const response = await axios.put(`${API_URL}/api/admin/products/${id}`,productData,{
-        headers:{
-            Authorization:USER_TOKEN,
-        }
-    })
+export const upadateProduct = createAsyncThunk("adminProducts/updateProduct", async ({ id, productData }) => {
+    const response = await axios.put(`${API_URL}/api/products/${id}`, productData, {
+        headers: {
+            Authorization: USER_TOKEN,
+        },
+    });
     return response.data;
-})  
+}); 
 
 // delete a product
 export const deleteProduct = createAsyncThunk("adminProducts/deleteProduct",async(id)=>{
-    const response = await axios.delete(`${API_URL}/api/admin/products/${id}`,{
+    const response = await axios.delete(`${API_URL}/api/products/${id}`,{
         headers:{
             Authorization:USER_TOKEN,
         },
@@ -54,14 +54,14 @@ const adminProductSlice = createSlice({
     reducers:{},
     extraReducers:(builder)=>{
         builder
-        .addCase(fetcAdminProducts.pending,(state)=>{
+        .addCase(fetchAdminProducts.pending,(state)=>{
             state.loading = true;
         })
-        .addCase(fetcAdminProducts.fulfilled,(state,action)=>{
+        .addCase(fetchAdminProducts.fulfilled,(state,action)=>{
             state.loading = false;
             state.products = action.payload;
         })
-        .addCase(fetcAdminProducts.rejected,(state,action)=>{
+        .addCase(fetchAdminProducts.rejected,(state,action)=>{
             state.loading = false;
             state.error = action.error.message;
         })
@@ -70,11 +70,9 @@ const adminProductSlice = createSlice({
             state.products.push(action.payload);
         })
         // update products
-        .addCase(upadateProduct.fulfilled,(state,action)=>{
-            const index = state.products.findIndex(
-                (product)=>product._id === action.payload._id
-            )
-            if(index !== -1){
+        .addCase(upadateProduct.fulfilled, (state, action) => {
+            const index = state.products.findIndex((product) => product._id === action.payload._id);
+            if (index !== -1) {
                 state.products[index] = action.payload;
             }
         })

@@ -53,15 +53,7 @@ const productSchema = new mongoose.Schema({
         type:String,
         enum:["Men","Women","Unisex"],
     },
-    images:[{
-        url:{
-            type:String,
-            required:true,
-        },
-        altText:{
-            type:String,
-        },
-    }],
+    images: [{ url: String }],
     isFeatured:{
         type:Boolean,
         default:false,

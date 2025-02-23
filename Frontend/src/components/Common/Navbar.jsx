@@ -8,6 +8,7 @@ import { IoMdClose } from "react-icons/io";
 import { useSelector } from "react-redux";
 
 const Navbar = () => {
+  const {user} = useSelector((state)=>state.auth)
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [navDrawerOpen, setNavDrawerOpen] = useState(false);
   const {cart} = useSelector((state)=>state.cart);
@@ -59,9 +60,9 @@ const Navbar = () => {
         </div>
         {/* right-icons */}
         <div className="flex items-center space-x-4">
-          <Link to="/admin" className="bg-black block px-2 rounded text-sm text-white ">
+          {user && user.role === "admin" && (<Link to="/admin" className="bg-black block px-2 rounded text-sm text-white ">
             Admin
-          </Link>
+          </Link>)}
           <Link to="/profile" className="hover:text-black">
             <HiOutlineUser className="h-6 w-6 text-gray-700" />
           </Link>

@@ -154,15 +154,11 @@ const MyOrdersPage = () => {
                               {item.name}
                             </p>
                             <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
-                              {/* {item.color && (
+                              {item.color && (
                                 <div className="flex items-center gap-2">
                                   <span>Color:</span>
-                                  <div
-                                    className="w-4 h-4 rounded-full border"
-                                    style={{
-                                      backgroundColor: item.color.toLowerCase(),
-                                    }}
-                                  />
+                                  <div/>
+                                  <span>{item.color}</span>
                                 </div>
                               )}
                               {item.size && (
@@ -170,7 +166,7 @@ const MyOrdersPage = () => {
                                   <span>Size:</span>
                                   <span className="font-medium">{item.size}</span>
                                 </div>
-                              )} */}
+                              )}
                               <div className="flex items-center gap-2">
                                 <span>Qty:</span>
                                 <span className="font-medium">

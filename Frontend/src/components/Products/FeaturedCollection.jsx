@@ -1,50 +1,79 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import featured from "../../assets/featured.webp";
-import { ArrowRight } from 'react-feather'; // Assuming you're using react-icons
+import { ArrowRight } from 'react-feather';
 
 const FeaturedCollection = () => {
   return (
-    <section className='py-20 px-4 lg:px-0 bg-gradient-to-b from-emerald-50 to-white'>
-        <div className="container mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
-            {/* Text Content */}
-            <div className="lg:w-1/2 text-center lg:text-left space-y-6 animate-fade-in-up">
-                <span className='uppercase tracking-widest text-emerald-600 font-medium'>
-                    New Collection
-                </span>
-                <h1 className='text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight'>
-                    Elevate Your <br className='hidden lg:block'/>Everyday Style
-                </h1>
-                <p className='text-lg text-gray-600 max-w-2xl lg:pr-10'>
-                    Experience premium comfort with our thoughtfully designed apparel. Crafted with sustainable materials and modern aesthetics for life's daily adventures.
-                </p>
-                <Link 
-                    to="/collections/all" 
-                    className='inline-flex items-center gap-2 bg-emerald-600 text-white px-8 py-4 rounded-full text-lg font-medium hover:bg-emerald-700 transition-all transform hover:-translate-y-1'
-                >
-                    Explore Collection
-                    <ArrowRight className='w-5 h-5' />
-                </Link>
+    <section className="relative bg-neutral-100">
+      <div className="container mx-auto px-4 py-16">
+        <div className="flex flex-col md:flex-row items-center gap-8">
+          {/* Image Side */}
+          <div className="w-full md:w-1/2">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors rounded-2xl" />
+              <img 
+                src={featured}
+                alt="Featured collection showcase"
+                className="w-full h-[500px] object-cover rounded-2xl"
+              />
+              <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full">
+                <p className="text-sm font-medium">Limited Edition Collection</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Side */}
+          <div className="w-full md:w-1/2 space-y-8 md:pl-8">
+            <div>
+              <h2 className="text-6xl font-bold mb-6">
+                New Season
+                <br />
+                New Style
+              </h2>
+              <p className="text-lg text-neutral-600">
+                Discover our latest collection designed for those who appreciate 
+                minimalist aesthetics and maximum comfort.
+              </p>
             </div>
 
-            {/* Image Content */}
-            <div className="lg:w-1/2 relative group">
-                <div className='relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-emerald-100/50 transition-shadow duration-300'>
-                    <img 
-                        src={featured} 
-                        alt="Modern apparel collection" 
-                        className='w-full h-[600px] object-cover transform group-hover:scale-105 transition-transform duration-500'
-                    />
-                    <div className='absolute inset-0 bg-gradient-to-b from-transparent to-black/20' />
-                </div>
-                
-                {/* Decorative Elements */}
-                <div className='hidden lg:block absolute -left-16 top-1/2 -translate-y-1/2 w-32 h-32 bg-emerald-100/50 rounded-full blur-3xl' />
-                <div className='hidden lg:block absolute -right-16 bottom-0 w-48 h-48 bg-emerald-100/30 rounded-full blur-3xl' />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white p-4 rounded-xl">
+                <p className="text-2xl font-bold mb-1">50+</p>
+                <p className="text-sm text-neutral-500">New Arrivals</p>
+              </div>
+              <div className="bg-white p-4 rounded-xl">
+                <p className="text-2xl font-bold mb-1">70h</p>
+                <p className="text-sm text-neutral-500">Fast Delivery</p>
+              </div>
             </div>
+
+            <div className="space-y-4">
+              <Link 
+                to="/collections/all"
+                className="flex items-center justify-between bg-black text-white px-8 py-4 rounded-xl hover:bg-neutral-800 transition-colors w-full"
+              >
+                <span className="text-lg font-medium">Shop Collection</span>
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+{/*               
+              <Link 
+                to="/new-arrivals"
+                className="flex items-center justify-between bg-white px-8 py-4 rounded-xl hover:bg-neutral-50 transition-colors w-full"
+              >
+                <span className="text-lg font-medium">View New Arrivals</span>
+                <ArrowRight className="w-5 h-5" />
+              </Link> */}
+            </div>
+          </div>
         </div>
-    </section>
-  )
-}
+      </div>
 
-export default FeaturedCollection
+      {/* Background Decoration */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-200 rounded-full blur-3xl -z-10" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-neutral-200 rounded-full blur-3xl -z-10" />
+    </section>
+  );
+};
+
+export default FeaturedCollection;

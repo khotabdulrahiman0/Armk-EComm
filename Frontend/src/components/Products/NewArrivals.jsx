@@ -1,33 +1,34 @@
-import React, { useEffect, useRef, useState} from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import React, { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from 'react-feather';
 import { Link } from "react-router-dom";
-import axios from "axios"
+import axios from "axios";
 
 const NewArrivals = () => {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [newArrivals, setNewArrivals] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [newArrivals,setNewArrivals] = useState([])
-
-  useEffect(()=>{
-    const fetchNewArrivals = async()=>{
+  useEffect(() => {
+    const fetchNewArrivals = async () => {
       try {
+        setIsLoading(true);
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products/new-arrivals`);
-        console.log("API Response:", response.data); // Debugging
-
-        setNewArrivals(response.data)
+        setNewArrivals(response.data);
       } catch (error) {
-        console.log(error)
+        console.log(error);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchNewArrivals()
-  },[])
+    fetchNewArrivals();
+  }, []);
 
   const scroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = direction === "left" ? -300 : 300;
+      const scrollAmount = direction === "left" ? -400 : 400;
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
@@ -55,57 +56,82 @@ const NewArrivals = () => {
   }, [newArrivals]);
 
   return (
-    <section className="relative px-4 sm:px-8">
-      <div className="container mx-auto text-center mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-3">Explore New Arrivals</h2>
-        <p className="text-sm sm:text-lg text-gray-600">
-          Discover the latest styles straight off the runway, freshly added to keep your wardrobe on the cutting edge.
-        </p>
-      </div>
-
-      {/* Scrollable Content with Buttons */}
-      <div className="relative">
-        {/* Scroll Buttons */}
-        <button
-          onClick={() => scroll("left")}
-          className={`absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-gray-300 text-black shadow-md z-10 sm:p-3 ${
-            !canScrollLeft && "opacity-50 cursor-not-allowed"
-          }`}
-          disabled={!canScrollLeft}
-        >
-          <FiChevronLeft className="text-2xl sm:text-3xl" />
-        </button>
-
-        <div
-          ref={scrollRef}
-          className="flex space-x-4 overflow-x-auto scroll-smooth scrollbar-hide px-2 sm:px-6"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {newArrivals.map((product) => (
-            <div key={product._id} className="min-w-[70%] sm:min-w-[45%] lg:min-w-[30%] relative">
-              <img className="w-full h-[250px] sm:h-[300px] object-cover rounded-lg shadow-lg" src={product.images?.[0]?.url} alt={product.name} />
-              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-3 rounded-b-lg">
-                <Link to={`/product/${product._id}`} className="block">
-                  <h4 className="font-medium text-sm sm:text-base">{product.name}</h4>
-                  <p className="text-sm sm:text-base">${product.price}</p>
-                </Link>
-              </div>
-            </div>  
-          ))}
+    <section className="py-16 bg-gray-50">
+      <div className="container mx-auto px-6 md:px-12">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+          <div>
+            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Latest Collection</span>
+            <h2 className="text-3xl font-bold text-gray-800">New Arrivals</h2>
+          </div>
+          <Link to="/collections/all" className="text-sm font-medium mt-2 md:mt-0 text-indigo-600 hover:underline">
+            View All Products →
+          </Link>
         </div>
 
-        <button
-          onClick={() => scroll("right")}
-          className={`absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-gray-300 text-black shadow-md z-10 sm:p-3 ${
-            !canScrollRight && "opacity-50 cursor-not-allowed"
-          }`}
-          disabled={!canScrollRight}
-        >
-          <FiChevronRight className="text-2xl sm:text-3xl" />
-        </button>
+        {/* Products Carousel */}
+        <div className="relative">
+          {/* Scroll Buttons */}
+          {canScrollLeft && (
+            <button
+              onClick={() => scroll("left")}
+              className="absolute -left-5 top-1/2 -translate-y-1/2 w-14 h-14 flex items-center justify-center bg-white shadow-md rounded-full z-10 hover:scale-110 transition"
+            >
+              <ChevronLeft className="w-8 h-8 text-gray-700" />
+            </button>
+          )}
+
+          <div
+            ref={scrollRef}
+            className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide py-4"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {isLoading ? (
+              [...Array(4)].map((_, index) => (
+                <div key={index} className="min-w-[300px] animate-pulse">
+                  <div className="aspect-[3/4] bg-gray-200 rounded-lg mb-3" />
+                  <div className="h-4 bg-gray-300 w-2/3 mb-2 rounded" />
+                  <div className="h-4 bg-gray-300 w-1/3 rounded" />
+                </div>
+              ))
+            ) : (
+              newArrivals.map((product) => (
+                <Link
+                  key={product._id}
+                  to={`/product/${product._id}`}
+                  className="min-w-[300px] group shadow-md hover:shadow-lg rounded-lg overflow-hidden bg-white"
+                >
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
+                    <img 
+                      src={product.images?.[0]?.url || "/placeholder.jpg"}
+                      alt={product.name}
+                      className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-md font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                      {product.name}
+                    </h3>
+                    <p className="mt-1 text-md text-gray-600 font-medium">
+                      ${product.price}
+                    </p>
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+
+          {canScrollRight && (
+            <button
+              onClick={() => scroll("right")}
+              className="absolute -right-5 top-1/2 -translate-y-1/2 w-14 h-14 flex items-center justify-center bg-white shadow-md rounded-full z-10 hover:scale-110 transition"
+            >
+              <ChevronRight className="w-8 h-8 text-gray-700" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Hide Scrollbar for Webkit Browsers */}
       <style>
         {`
           .scrollbar-hide::-webkit-scrollbar {

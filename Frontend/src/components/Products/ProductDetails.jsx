@@ -5,7 +5,8 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductDetails, fetchSimilarProduct } from '../../redux/slices/productSlice';
 import { addToCart } from '../../redux/slices/cartSlice';
-import tinycolor from 'tinycolor2'; // Import tinycolor2
+import { Heart, Minus, Plus, ShoppingBag, Share2 } from 'react-feather';
+import tinycolor from 'tinycolor2';
 
 const ProductDetails = ({ productId }) => {
   const { id } = useParams();
@@ -61,113 +62,110 @@ const ProductDetails = ({ productId }) => {
       .finally(() => setIsButtonDisabled(false));
   };
 
-  // Helper function to normalize and validate colors using tinycolor2
   const getValidColor = (color) => {
     const normalizedColor = tinycolor(color);
-    return normalizedColor.isValid() ? normalizedColor.toHexString() : '#cccccc'; // Fallback to a default color
+    return normalizedColor.isValid() ? normalizedColor.toHexString() : '#cccccc';
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return <p className="text-center p-6">Loading...</p>;
+  if (error) return <p className="text-red-500 text-center p-6">Error: {error}</p>;
 
   return (
-    <div className="p-6">
+    <div className="max-w-7xl mx-auto p-6">
       {selectedProduct && (
-        <div className="max-w-6xl bg-white p-8 rounded-lg">
-          <div className="flex flex-col md:flex-row">
-            <div className="hidden md:flex flex-col space-y-4 mr-6">
-              {selectedProduct.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image.url}
-                  alt={image.altText}
-                  className={`w-20 h-20 object-cover cursor-pointer rounded-lg border ${
-                    mainImage === image.url ? 'border-black border-4' : 'border-gray-300'
-                  }`}
-                  onClick={() => setMainImage(image.url)}
-                />
-              ))}
-            </div>
-            <div className="md:w-1/2">
-              <img src={mainImage} alt="Main Product" className="w-full h-auto object-cover rounded-lg" />
-            </div>
-            <div className="md:w-1/2 md:ml-10">
-              <h1 className="text-2xl md:text-3xl font-semibold mb-2">{selectedProduct.name}</h1>
-              <p className="text-lg text-gray-600 mb-1 line-through">
-                {selectedProduct.originalPrice && `$${selectedProduct.originalPrice}`}
-              </p>
-              <p className="text-xl text-gray-600 mb-2">${selectedProduct.price}</p>
-              <p className="text-gray-600 mb-4">{selectedProduct.description}</p>
-
-              <div className="mb-4">
-                <p className="text-gray-700">Color:</p>
-                <div className="flex gap-2 mt-2">
-                  {selectedProduct.colors.map((color) => {
-                    const validColor = getValidColor(color); // Get a valid CSS color
-                    return (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`w-10 h-10 rounded-full border-2 border-gray-400 flex items-center justify-center transition-all ${
-                          selectedColor === color ? 'ring-2 ring-black' : ''
-                        }`}
-                      >
-                        <div
-                          className="w-8 h-8 rounded-full"
-                          style={{ backgroundColor: validColor }} // Use the valid color
-                        ></div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <p className="text-gray-600">Size:</p>
-                <div className="flex gap-2 mt-2">
-                  {selectedProduct.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 rounded border ${
-                        selectedSize === size ? 'border-4 border-black' : 'border-gray-300'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <p className="text-gray-700">Quantity:</p>
-                <div className="flex items-center space-x-4 mt-2">
-                  <button onClick={decreaseQuantity} className="px-2 py-1 bg-gray-200 rounded text-lg">
-                    -
-                  </button>
-                  <span>{quantity}</span>
-                  <button onClick={increaseQuantity} className="px-2 py-1 bg-gray-200 rounded text-lg">
-                    +
-                  </button>
-                </div>
-              </div>
-
-              <button
-                onClick={handleAddToCart}
-                className={`py-2 px-6 rounded uppercase text-center w-full mb-4 bg-black text-white ${
-                  isButtonDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-900'
-                }`}
-              >
-                {isButtonDisabled ? 'Select size and color' : 'Add to Cart'}
+        <div className="bg-white rounded-xl shadow-md flex flex-col md:flex-row p-8 gap-8">
+          {/* Left: Image Gallery */}
+          <div className="md:w-1/2 flex flex-col gap-4">
+            <div className="relative group">
+              <img
+                src={mainImage}
+                alt="Main Product"
+                className="w-full h-[500px] object-cover rounded-lg"
+              />
+              <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md hover:bg-gray-50">
+                <Heart className="w-5 h-5 text-gray-600" strokeWidth={1.5} />
               </button>
             </div>
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {selectedProduct.images.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => setMainImage(image.url)}
+                  className={`flex-shrink-0 relative w-20 h-20 rounded-lg overflow-hidden border ${
+    mainImage === image.url ? 'border-black' : 'hover:border-gray-400'
+  }`}
+                >
+                  <img src={image.url} alt={image.altText} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: Product Info */}
+          <div className="md:w-1/2 space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">{selectedProduct.name}</h1>
+            <p className="text-xl font-semibold text-gray-900">${selectedProduct.price}</p>
+            <p className="text-gray-600">{selectedProduct.description}</p>
+
+            {/* Color Selection */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-2">Color</label>
+              <div className="flex gap-3">
+                {selectedProduct.colors.map((color) => {
+                  const validColor = getValidColor(color);
+                  return (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`w-10 h-10 rounded-full ${
+    selectedColor === color ? 'ring-2 ring-black' : 'hover:ring-2 hover:ring-gray-300'
+  }`}
+                      style={{ backgroundColor: validColor }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Size Selection */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-2">Size</label>
+              <div className="flex gap-3">
+                {selectedProduct.sizes.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-6 py-3 rounded-lg ${
+    selectedSize === size ? 'bg-black text-white' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+  }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quantity & Add to Cart */}
+            <div className="flex items-center gap-4">
+              <button onClick={decreaseQuantity} className="p-2 bg-gray-200 rounded-full">
+                <Minus className="w-5 h-5" />
+              </button>
+              <span className="text-lg font-medium">{quantity}</span>
+              <button onClick={increaseQuantity} className="p-2 bg-gray-200 rounded-full">
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
+
+            <button
+              onClick={handleAddToCart}
+              disabled={isButtonDisabled}
+              className="w-full py-4 bg-black text-white rounded-lg"
+            >
+              <ShoppingBag className="w-5 h-5 inline" /> Add to Cart
+            </button>
           </div>
         </div>
       )}
-      <div className="mt-8 border-t-4">
-        <h2 className="text-2xl text-center font-medium mb-4">You May Also Like</h2>
-        <ProductGrid products={similarProducts} loading={loading} error={error} />
-      </div>
     </div>
   );
 };

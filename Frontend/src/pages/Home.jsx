@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Award, TrendingUp } from 'react-feather';
 import Hero from '../components/Layout/Hero';
 import GenderCollectionSection from '../components/Products/GenderCollectionSection';
 import NewArrivals from '../components/Products/NewArrivals';
@@ -30,7 +31,7 @@ const Home = () => {
     const fetchBestSeller = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products/best-seller`);
-        console.log('Best Seller Response:', response.data); // Debugging
+        console.log('Best Seller Response:', response.data);
         setBestSellerProduct(response.data);
       } catch (error) {
         console.error('Error fetching best seller:', error);
@@ -43,24 +44,42 @@ const Home = () => {
   }, [dispatch]);
 
   return (
-    <div>
+    <div className="min-h-screen">
       <Hero />
       <GenderCollectionSection />
       <NewArrivals />
 
       {/* Best Sellers Section */}
-      <h2 className="text-3xl text-center font-bold mb-4 mt-4">Best Seller</h2>
-      {bestSellerLoading ? (
-        <p className="text-center">Loading best seller product...</p>
-      ) : bestSellerProduct ? (
-        <ProductDetails productId={bestSellerProduct._id} />
-      ) : (
-        <p className="text-center">No best seller product found.</p>
-      )}
+      <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 py-12">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600"></div>
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <Award className="w-8 h-8 text-yellow-500" strokeWidth={1.5} />
+            <h2 className="text-3xl font-bold text-center">Best Seller</h2>
+            <TrendingUp className="w-8 h-8 text-yellow-500" strokeWidth={1.5} />
+          </div>
+          
+          {bestSellerLoading ? (
+            <div className="w-full flex items-center justify-center p-12">
+              <div className="animate-pulse space-y-4">
+                <div className="h-48 bg-gray-200 rounded w-full"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          ) : bestSellerProduct ? (
+            <ProductDetails productId={bestSellerProduct._id} />
+          ) : (
+            <p className="text-center text-gray-600">No best seller product found.</p>
+          )}
+        </div>
+      </div>
 
       {/* Top Wears for Women's Section */}
-      <div className="container mx-auto">
-        <h2 className="text-3xl text-center font-bold mb-4">Top Wears for Women's</h2>
+      <div className="container mx-auto px-4 py-16">
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <h2 className="text-3xl font-bold text-center">Top Wears for Women's</h2>
+        </div>
         <ProductGrid products={products} loading={loading} error={error} />
       </div>
 

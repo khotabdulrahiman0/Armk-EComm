@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { fetchOrderDetails } from '../redux/slices/orderSlice';
 
-const OrderDetailsPage = () => {
+const AdminOrdersDetailPage = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
     const { orderDetails, loading, error } = useSelector((state) => state.orders);
@@ -43,7 +43,7 @@ const OrderDetailsPage = () => {
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
             <div className="mb-8">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Order Details</h1>
-                <Link to="/my-orders" className="text-blue-600 hover:underline mt-2 inline-block">
+                <Link to="/admin/orders" className="text-blue-600 hover:underline mt-2 inline-block">
                     &larr; Back to Orders
                 </Link>
             </div>
@@ -82,46 +82,42 @@ const OrderDetailsPage = () => {
                     </div>
                 </div>
 
-                {/* Order Information Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 border-b border-gray-200">
-                    {/* Payment Information */}
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Information</h3>
-                        <div className="space-y-1 text-sm text-gray-600">
-                            <p>Method: {orderDetails.paymentMethod}</p>
-                            {orderDetails.isPaid && (
-                                <p>Paid on: {new Date(orderDetails.paidAt).toLocaleDateString()}</p>
-                            )}
-                        </div>
+                {/* Order Items */}
+                <div className="p-6 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Ordered Items</h3>
+                    <div className="space-y-4">
+                        {orderDetails.orderItems.map((item) => (
+                            <div key={item._id} className="flex items-center gap-4 border-b pb-4">
+                                <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-md" />
+                                <div>
+                                    <p className="text-gray-900 font-medium">{item.name}</p>
+                                    {item.size && <p className="text-gray-600 text-sm">Size: {item.size}</p>}
+                                    {item.color && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-gray-600 text-sm">Color:</span>
+                                            <div
+                                                className="w-4 h-4 rounded-full"
+                                                style={{ backgroundColor: item.color }}
+                                            ></div>
+                                        </div>
+                                    )}
+                                    <p className="text-gray-600 text-sm">Quantity: {item.qty}</p>
+                                    <p className="text-gray-900 font-semibold">${item.price}</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
+                </div>
 
-                    {/* Shipping Information */}
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Shipping Information</h3>
-                        <div className="space-y-1 text-sm text-gray-600">
-                            {/* <p>Method: {orderDetails.shippingMethod}</p> */}
-                            {orderDetails.shippingAddress && (
-                                <> Shipping Address: 
-                                    <p>{orderDetails.shippingAddress.address}</p>
-                                    <p>{orderDetails.shippingAddress.city}, {orderDetails.shippingAddress.country}</p>
-                                    <p>{orderDetails.shippingAddress.postalCode}</p>
-                                </>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Order Summary */}
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Order Summary</h3>
-                        <div className="space-y-1 text-sm text-gray-600">
-                            <p>Items: {orderDetails.orderItems.length}</p>
-                            <p className="font-medium">Total: ${orderDetails.totalPrice}</p>
-                        </div>
-                    </div>
+                {/* Order Summary */}
+                <div className="p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Order Summary</h3>
+                    <p className="text-sm text-gray-600">Items: {orderDetails.orderItems.length}</p>
+                    <p className="font-medium">Total: ${orderDetails.totalPrice}</p>
                 </div>
             </div>
         </div>
     );
 };
 
-export default OrderDetailsPage;
+export default AdminOrdersDetailPage;

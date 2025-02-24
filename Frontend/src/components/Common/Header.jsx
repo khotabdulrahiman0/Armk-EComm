@@ -6,7 +6,7 @@ const Header = () => {
   return (
     <header className='border-b border-b-gray-400'>
         {/* Topbar */}
-        <TopBar/>
+        {/* <TopBar/> */}
          {/* Navbar */}
          <Navbar/>
           {/* Cart Drawer */}

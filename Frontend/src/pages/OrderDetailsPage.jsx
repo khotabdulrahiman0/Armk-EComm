@@ -39,6 +39,16 @@ const OrderDetailsPage = () => {
     const estimatedDeliveryDate = new Date(orderDate);
     estimatedDeliveryDate.setDate(orderDate.getDate() + Math.floor(Math.random() * (7 - 3 + 1) + 3));
 
+    // Calculate subtotal (original price of all products)
+    const subtotal = orderDetails.orderItems.reduce(
+        (acc, item) => acc + (item.price * item.quantity), 
+        0
+    );
+
+    // Calculate delivery charges (assuming it's the difference between total and subtotal)
+    // If you have a specific field for delivery charges in your order model, use that instead
+    const deliveryCharges = orderDetails.totalPrice - subtotal;
+
     return (
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
             <div className="mb-8">
@@ -82,6 +92,61 @@ const OrderDetailsPage = () => {
                     </div>
                 </div>
 
+                {/* Order Items */}
+                <div className="p-6 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Product
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Price
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Quantity
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {orderDetails.orderItems.map((item, index) => (
+                                    <tr key={index}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="flex-shrink-0 h-12 w-12">
+                                                    <img className="h-12 w-12 object-cover rounded-md" src={item.image} alt={item.name} />
+                                                </div>
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                                                    {item.size && item.color && (
+                                                        <div className="text-xs text-gray-500">
+                                                            Size: {item.size}, Color: {item.color}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                                            ₹{item.price.toFixed(2)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                                            {item.quantity}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                                            ₹{(item.price * item.quantity).toFixed(2)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 {/* Order Information Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 border-b border-gray-200">
                     {/* Payment Information */}
@@ -99,12 +164,13 @@ const OrderDetailsPage = () => {
                     <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Shipping Information</h3>
                         <div className="space-y-1 text-sm text-gray-600">
-                            {/* <p>Method: {orderDetails.shippingMethod}</p> */}
                             {orderDetails.shippingAddress && (
-                                <> Shipping Address: 
+                                <>
+                                    <p>{orderDetails.shippingAddress.firstName} {orderDetails.shippingAddress.lastName}</p>
                                     <p>{orderDetails.shippingAddress.address}</p>
                                     <p>{orderDetails.shippingAddress.city}, {orderDetails.shippingAddress.country}</p>
                                     <p>{orderDetails.shippingAddress.postalCode}</p>
+                                    <p>Phone: {orderDetails.shippingAddress.phone}</p>
                                 </>
                             )}
                         </div>
@@ -113,9 +179,19 @@ const OrderDetailsPage = () => {
                     {/* Order Summary */}
                     <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Order Summary</h3>
-                        <div className="space-y-1 text-sm text-gray-600">
-                            <p>Items: {orderDetails.orderItems.length}</p>
-                            <p className="font-medium">Total: ₹{orderDetails.totalPrice}</p>
+                        <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Subtotal:</span>
+                                <span className="text-gray-900">₹{subtotal.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Delivery Charges:</span>
+                                <span className="text-gray-900">₹{deliveryCharges.toFixed(2)}</span>
+                            </div>
+                            <div className="pt-2 mt-2 border-t border-gray-200 flex justify-between">
+                                <span className="font-medium text-gray-900">Total:</span>
+                                <span className="font-bold text-gray-900">₹{orderDetails.totalPrice.toFixed(2)}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

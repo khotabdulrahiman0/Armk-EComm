@@ -81,7 +81,7 @@ const OrderManagement = () => {
               <th className="py-4 px-3">Items</th>
               <th className="py-4 px-3">Total Price</th>
               <th className="py-4 px-3">Status</th>
-              <th className="py-4 px-3">Actions</th>
+              {/* <th className="py-4 px-3">Actions</th> */}
             </tr>
           </thead>
           <tbody>

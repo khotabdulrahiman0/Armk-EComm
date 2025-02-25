@@ -118,25 +118,29 @@ const Checkout = () => {
 
   const handleFinalizeCheckout = async (id) => {
     if (!id) {
-      console.error("Checkout ID is missing.");
-      return;
+        console.error("Checkout ID is missing.");
+        return;
     }
 
     try {
-      await axios.post(
-        `${BACKEND_URL}/api/checkout/${id}/finalize`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-        }
-      );
-      navigate("/order-confirmation");
+        // Navigate immediately after making the request
+        navigate("/order-confirmation");
+
+        // Send request to finalize checkout
+        await axios.post(
+            `${BACKEND_URL}/api/checkout/${id}/finalize`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+                },
+            }
+        );
     } catch (error) {
-      console.error("Finalize Checkout Error:", error);
+        console.error("Finalize Checkout Error:", error);
     }
-  };
+};
+
 
   if (loading) return <p>Loading cart...</p>;
   if (error) return <p>Error: {error}</p>;

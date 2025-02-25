@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import register from '../assets/register.webp';
-import { registerUser } from "../redux/slices/authSlice";
+import { registerRequestOTP, registerVerifyOTP, resendOTP } from "../redux/slices/authSlice";
 import { useDispatch, useSelector } from 'react-redux';
 import { mergeCart } from '../redux/slices/cartSlice';
 
 const Register = () => {
+    const [step, setStep] = useState(1); // Step 1: Request OTP, Step 2: Verify OTP
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [otp, setOtp] = useState('');
+    const [otpSent, setOtpSent] = useState(false);
+    const [countdown, setCountdown] = useState(0);
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -32,61 +37,155 @@ const Register = () => {
             }
         }
     }, [user, cart?.products?.length, guestId, dispatch, navigate, redirect, isCheckoutRedirect]);
-    const handleSubmit = (e) => {
+
+    useEffect(() => {
+        if (countdown > 0) {
+            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [countdown]);
+
+    // Step 1: Request OTP
+    const handleRequestOTP = (e) => {
         e.preventDefault();
-        dispatch(registerUser({name, email, password}))
+        dispatch(registerRequestOTP({ email }))
+            .then((response) => {
+                if (response.payload) {
+                    setOtpSent(true);
+                    setStep(2);
+                    setCountdown(60);
+                }
+            });
+    };
+
+    // Step 2: Verify OTP and complete registration
+    const handleVerifyOTP = (e) => {
+        e.preventDefault();
+        dispatch(registerVerifyOTP({ email, otp, name, password }));
+    };
+
+    // Handle Resend OTP
+    const handleResendOTP = () => {
+        dispatch(resendOTP({ email }))
+            .then((response) => {
+                if (response.payload) {
+                    setCountdown(60);
+                }
+            });
     };
 
     return (
         <div className='flex min-h-screen'>
-            {/* Left Side - Form */}
             <div className='w-full md:w-1/2 flex flex-col justify-center items-center px-8 md:px-16 bg-white'>
-                <form onSubmit={handleSubmit} className='w-full max-w-md bg-white p-8 rounded-lg shadow-lg border'>
+                <form 
+                    onSubmit={step === 1 ? handleRequestOTP : handleVerifyOTP} 
+                    className='w-full max-w-md bg-white p-8 rounded-lg shadow-lg border'
+                >
                     <div className='flex justify-center mb-6'>
                         <h2 className='text-2xl font-bold text-gray-900'>ARMK</h2>
                     </div>
-                    <h2 className='text-3xl font-bold text-center mb-4 text-gray-800'>Create Your Account</h2>
-                    <p className='text-center text-gray-600 mb-6'>Join us and start your journey today!</p>
+                    
+                    {step === 1 ? (
+                        <>
+                            <h2 className='text-3xl font-bold text-center mb-4 text-gray-800'>Create Your Account</h2>
+                            <p className='text-center text-gray-600 mb-6'>Enter your email to get started</p>
+                            
+                            <div className='mb-4'>
+                                <label className='block text-sm font-semibold text-gray-700 mb-2'>Email</label>
+                                <input 
+                                    type='email' 
+                                    value={email} 
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black'
+                                    placeholder='Enter your email address' 
+                                    required 
+                                />
+                            </div>
 
-                    <div className='mb-4'>
-                        <label className='block text-sm font-semibold text-gray-700 mb-2'>Name</label>
-                        <input type='text' value={name} onChange={(e) => setName(e.target.value)}
-                            className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black'
-                            placeholder='Enter your name' required />
-                    </div>
+                            {error && <p className='text-red-500 mb-4'>{error}</p>}
 
-                    <div className='mb-4'>
-                        <label className='block text-sm font-semibold text-gray-700 mb-2'>Email</label>
-                        <input type='email' value={email} onChange={(e) => setEmail(e.target.value)}
-                            className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black'
-                            placeholder='Enter your email address' required />
-                    </div>
-
-                    <div className='mb-4'>
-                        <label className='block text-sm font-semibold text-gray-700 mb-2'>Password</label>
-                        <input type='password' value={password} onChange={(e) => setPassword(e.target.value)}
-                            className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black'
-                            placeholder='Enter your password' required />
-                    </div>
-
-                    <button type='submit' className='w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-all'>
-                        Sign Up
-                    </button>
+                            <button 
+                                type='submit' 
+                                className='w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-all'
+                                disabled={loading}
+                            >
+                                {loading ? 'Sending OTP...' : 'Continue with Email'}
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <h2 className='text-3xl font-bold text-center mb-4 text-gray-800'>Verify Your Email</h2>
+                            <p className='text-center text-gray-600 mb-6'>We've sent a code to {email}</p>
+                            
+                            <div className='mb-4'>
+                                <label className='block text-sm font-semibold text-gray-700 mb-2'>Name</label>
+                                <input 
+                                    type='text' 
+                                    value={name} 
+                                    onChange={(e) => setName(e.target.value)}
+                                    className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black'
+                                    placeholder='Enter your name' 
+                                    required 
+                                />
+                            </div>
+                            
+                            <div className='mb-4'>
+                                <label className='block text-sm font-semibold text-gray-700 mb-2'>Password</label>
+                                <input 
+                                    type='password' 
+                                    value={password} 
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black'
+                                    placeholder='Create a password' 
+                                    required 
+                                />
+                            </div>
+                            
+                            <div className='mb-4'>
+                                <label className='block text-sm font-semibold text-gray-700 mb-2'>Verification Code</label>
+                                <input 
+                                    type='text' 
+                                    value={otp} 
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black'
+                                    placeholder='Enter the 6-digit code' 
+                                    required 
+                                    maxLength={6}
+                                />
+                            </div>
+                            
+                            {error && <p className='text-red-500 mb-4'>{error}</p>}
+                            
+                            <button 
+                                type='submit' 
+                                className='w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-all mb-4'
+                                disabled={loading}
+                            >
+                                {loading ? 'Verifying...' : 'Complete Registration'}
+                            </button>
+                            
+                            <div className='text-center'>
+                                {countdown > 0 ? (
+                                    <p className='text-sm text-gray-500'>Resend code in {countdown}s</p>
+                                ) : (
+                                    <button 
+                                        type='button' 
+                                        onClick={handleResendOTP} 
+                                        className='text-sm text-blue-600 hover:underline'
+                                        disabled={loading}
+                                    >
+                                        Resend verification code
+                                    </button>
+                                )}
+                            </div>
+                        </>
+                    )}
 
                     <p className='mt-6 text-center text-sm text-gray-700'>
                         Already have an account? 
                         <Link to={`/login?redirect=${encodeURIComponent(redirect)}`} className='text-blue-600 hover:underline'> Login</Link>
                     </p>
                 </form>
-            </div>
-
-            {/* Right Side - Image */}
-            <div className='hidden md:flex w-1/2 bg-gray-900 relative'>
-                <img src={register} alt='Register Illustration' className='w-full h-full object-cover opacity-80' />
-                <div className='absolute inset-0 flex flex-col justify-center items-center text-center text-white bg-black bg-opacity-40 px-6'>
-                    <h2 className='text-4xl font-bold'>Join Us Today</h2>
-                    <p className='mt-4 text-lg'>Sign up now and start your journey.</p>
-                </div>
             </div>
         </div>
     );

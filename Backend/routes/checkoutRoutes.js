@@ -4,6 +4,8 @@ const Checkout = require("../models/Checkout");
 const Product = require("../models/products");
 const Order = require("../models/Order");
 const { protect } = require("../middleware/authMiddleware");
+const { sendOrderConfirmation } = require("../services/emailService"); // Import function
+
 
 const router = express.Router();
 
@@ -95,27 +97,27 @@ router.put("/:id/pay", protect, async (req, res) => {
 // Finalize order route
 router.post("/:id/finalize", protect, async (req, res) => {
     try {
-        const checkout = await Checkout.findById(req.params.id);
+        const checkout = await Checkout.findById(req.params.id).populate("user", "name email");
 
         if (!checkout) {
             return res.status(404).json({ msg: "Checkout not found" });
         }
 
         if (checkout.isPaid && !checkout.isFinalized) {
-            // Ensure order items include size & color
+            // Prepare final order items
             const finalOrderItems = checkout.checkoutItems.map(item => ({
                 productId: item.productId,
                 name: item.name,
                 image: item.image,
                 price: item.price,
                 quantity: item.quantity,
-                size: item.size || "N/A",  // Ensure size is passed
-                color: item.color || "N/A" // Ensure color is passed
+                size: item.size || "N/A",
+                color: item.color || "N/A"
             }));
 
             // Create a final order
             const finalOrder = await Order.create({
-                user: checkout.user,
+                user: checkout.user._id,
                 orderItems: finalOrderItems,
                 shippingAddress: checkout.shippingAddress,
                 paymentMethod: checkout.paymentMethod,
@@ -133,7 +135,10 @@ router.post("/:id/finalize", protect, async (req, res) => {
             await checkout.save();
 
             // Delete the user's cart to clean up
-            await Cart.findOneAndDelete({ user: checkout.user });
+            await Cart.findOneAndDelete({ user: checkout.user._id });
+
+            // Send order confirmation emails
+            await sendOrderConfirmation(checkout.user, finalOrder);
 
             res.status(201).json(finalOrder);
         } else if (checkout.isFinalized) {

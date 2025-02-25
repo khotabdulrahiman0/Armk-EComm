@@ -1,16 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = `${import.meta.env.VITE_BACKEND_URL}`; 
+const API_URL = `${import.meta.env.VITE_BACKEND_URL}`;
 
 const getAuthHeader = () => ({
-    Authorization: `Bearer ${localStorage.getItem("userToken")}`
+    Authorization: `Bearer ${localStorage.getItem("userToken")}`,
 });
 
 const handleApiError = (error) => {
     return {
         message: error.response?.data?.message || "An error occurred",
-        status: error.response?.status
+        status: error.response?.status,
     };
 };
 
@@ -20,7 +20,7 @@ export const fetchAllOrders = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await axios.get(`${API_URL}/api/admin/orders`, {
-                headers: getAuthHeader()
+                headers: getAuthHeader(),
             });
             return response.data;
         } catch (error) {
@@ -29,20 +29,17 @@ export const fetchAllOrders = createAsyncThunk(
     }
 );
 
-// Update order status
+// Update order status (Optimized to prevent full page reload)
 export const updateOrderStatus = createAsyncThunk(
     "adminOrders/updateOrderStatus",
-    async (orderData, { rejectWithValue }) => {
+    async ({ id, status }, { rejectWithValue }) => {
         try {
-            const { id, status } = orderData;
             const response = await axios.put(
                 `${API_URL}/api/admin/orders/${id}`,
                 { status },
-                {
-                    headers: getAuthHeader()
-                }
+                { headers: getAuthHeader() }
             );
-            return response.data;
+            return { id, status, updatedAt: response.data.updatedAt }; // Return only updated fields
         } catch (error) {
             return rejectWithValue(handleApiError(error));
         }
@@ -55,7 +52,7 @@ export const deleteOrder = createAsyncThunk(
     async (id, { rejectWithValue }) => {
         try {
             await axios.delete(`${API_URL}/api/admin/orders/${id}`, {
-                headers: getAuthHeader()
+                headers: getAuthHeader(),
             });
             return id;
         } catch (error) {
@@ -67,7 +64,7 @@ export const deleteOrder = createAsyncThunk(
 // Function to calculate total sales only for delivered orders
 const calculateTotalSales = (orders) => {
     return orders
-        .filter(order => order.status === "Delivered") // Only count delivered orders
+        .filter((order) => order.status === "Delivered")
         .reduce((acc, order) => acc + order.totalPrice, 0);
 };
 
@@ -79,12 +76,12 @@ const adminOrderSlice = createSlice({
         totalSales: 0,
         loading: false,
         error: null,
-        currentOperation: null // Track current operation type
+        updatingOrderId: null, // Track which order is updating
     },
     reducers: {
         clearError: (state) => {
             state.error = null;
-        }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -92,65 +89,54 @@ const adminOrderSlice = createSlice({
             .addCase(fetchAllOrders.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                state.currentOperation = "fetch";
             })
             .addCase(fetchAllOrders.fulfilled, (state, action) => {
                 state.loading = false;
                 state.orders = action.payload;
                 state.totalOrders = action.payload.length;
-                state.totalSales = calculateTotalSales(action.payload); // Calculate revenue from delivered orders
-                state.currentOperation = null;
+                state.totalSales = calculateTotalSales(action.payload);
             })
             .addCase(fetchAllOrders.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload.message;
-                state.currentOperation = null;
             })
-            // Update order status
-            .addCase(updateOrderStatus.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-                state.currentOperation = "update";
+
+            // Update order status (Prevent full page reload)
+            .addCase(updateOrderStatus.pending, (state, action) => {
+                state.updatingOrderId = action.meta.arg.id; // Track which order is updating
             })
             .addCase(updateOrderStatus.fulfilled, (state, action) => {
-                state.loading = false;
-                const updatedOrder = action.payload;
-                const orderIndex = state.orders.findIndex(order => order._id === updatedOrder._id);
-                
+                const { id, status, updatedAt } = action.payload;
+                const orderIndex = state.orders.findIndex((order) => order._id === id);
+
                 if (orderIndex !== -1) {
-                    state.orders[orderIndex] = {
-                        ...state.orders[orderIndex], 
-                        status: updatedOrder.status,
-                        updatedAt: updatedOrder.updatedAt
-                    };
+                    state.orders[orderIndex].status = status;
+                    state.orders[orderIndex].updatedAt = updatedAt;
                 }
-                state.totalSales = calculateTotalSales(state.orders); // Recalculate revenue for delivered orders
-                state.currentOperation = null;
+                state.totalSales = calculateTotalSales(state.orders);
+                state.updatingOrderId = null;
             })
             .addCase(updateOrderStatus.rejected, (state, action) => {
-                state.loading = false;
                 state.error = action.payload.message;
-                state.currentOperation = null;
+                state.updatingOrderId = null;
             })
+
             // Delete order
             .addCase(deleteOrder.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                state.currentOperation = "delete";
             })
             .addCase(deleteOrder.fulfilled, (state, action) => {
-                state.loading = false;
-                state.orders = state.orders.filter(order => order._id !== action.payload);
+                state.orders = state.orders.filter((order) => order._id !== action.payload);
                 state.totalOrders = state.orders.length;
-                state.totalSales = calculateTotalSales(state.orders); // Recalculate revenue for delivered orders
-                state.currentOperation = null;
+                state.totalSales = calculateTotalSales(state.orders);
+                state.loading = false;
             })
             .addCase(deleteOrder.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload.message;
-                state.currentOperation = null;
             });
-    }
+    },
 });
 
 export const { clearError } = adminOrderSlice.actions;

@@ -14,7 +14,7 @@ const handleApiError = (error) => {
     };
 };
 
-// fetch all orders
+// Fetch all orders
 export const fetchAllOrders = createAsyncThunk(
     "adminOrders/fetchAllOrders",
     async (_, { rejectWithValue }) => {
@@ -29,7 +29,7 @@ export const fetchAllOrders = createAsyncThunk(
     }
 );
 
-// update order status
+// Update order status
 export const updateOrderStatus = createAsyncThunk(
     "adminOrders/updateOrderStatus",
     async (orderData, { rejectWithValue }) => {
@@ -49,7 +49,7 @@ export const updateOrderStatus = createAsyncThunk(
     }
 );
 
-// deleting order
+// Delete order
 export const deleteOrder = createAsyncThunk(
     "adminOrders/deleteOrder",
     async (id, { rejectWithValue }) => {
@@ -64,8 +64,11 @@ export const deleteOrder = createAsyncThunk(
     }
 );
 
+// Function to calculate total sales only for delivered orders
 const calculateTotalSales = (orders) => {
-    return orders.reduce((acc, order) => acc + order.totalPrice, 0);
+    return orders
+        .filter(order => order.status === "Delivered") // Only count delivered orders
+        .reduce((acc, order) => acc + order.totalPrice, 0);
 };
 
 const adminOrderSlice = createSlice({
@@ -85,17 +88,17 @@ const adminOrderSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // fetch all orders
+            // Fetch all orders
             .addCase(fetchAllOrders.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                state.currentOperation = 'fetch';
+                state.currentOperation = "fetch";
             })
             .addCase(fetchAllOrders.fulfilled, (state, action) => {
                 state.loading = false;
                 state.orders = action.payload;
                 state.totalOrders = action.payload.length;
-                state.totalSales = calculateTotalSales(action.payload);
+                state.totalSales = calculateTotalSales(action.payload); // Calculate revenue from delivered orders
                 state.currentOperation = null;
             })
             .addCase(fetchAllOrders.rejected, (state, action) => {
@@ -103,27 +106,25 @@ const adminOrderSlice = createSlice({
                 state.error = action.payload.message;
                 state.currentOperation = null;
             })
-            // update order status
+            // Update order status
             .addCase(updateOrderStatus.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                state.currentOperation = 'update';
+                state.currentOperation = "update";
             })
             .addCase(updateOrderStatus.fulfilled, (state, action) => {
                 state.loading = false;
                 const updatedOrder = action.payload;
-                const orderIndex = state.orders.findIndex(
-                    (order) => order._id === updatedOrder._id
-                );
+                const orderIndex = state.orders.findIndex(order => order._id === updatedOrder._id);
+                
                 if (orderIndex !== -1) {
-                    // Preserve all existing order data, especially the user field
                     state.orders[orderIndex] = {
-                        ...state.orders[orderIndex],  // Keep all existing data
-                        status: updatedOrder.status,  // Only update the status
-                        // Add any other specific fields that should be updated
+                        ...state.orders[orderIndex], 
+                        status: updatedOrder.status,
                         updatedAt: updatedOrder.updatedAt
                     };
                 }
+                state.totalSales = calculateTotalSales(state.orders); // Recalculate revenue for delivered orders
                 state.currentOperation = null;
             })
             .addCase(updateOrderStatus.rejected, (state, action) => {
@@ -131,19 +132,17 @@ const adminOrderSlice = createSlice({
                 state.error = action.payload.message;
                 state.currentOperation = null;
             })
-            // delete order
+            // Delete order
             .addCase(deleteOrder.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                state.currentOperation = 'delete';
+                state.currentOperation = "delete";
             })
             .addCase(deleteOrder.fulfilled, (state, action) => {
                 state.loading = false;
-                state.orders = state.orders.filter(
-                    (order) => order._id !== action.payload
-                );
+                state.orders = state.orders.filter(order => order._id !== action.payload);
                 state.totalOrders = state.orders.length;
-                state.totalSales = calculateTotalSales(state.orders);
+                state.totalSales = calculateTotalSales(state.orders); // Recalculate revenue for delivered orders
                 state.currentOperation = null;
             })
             .addCase(deleteOrder.rejected, (state, action) => {

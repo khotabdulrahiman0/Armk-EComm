@@ -47,6 +47,13 @@ const AddProductPage = () => {
       [field]: values
     }));
   };
+  const handleeArrayInput = (e, field) => {
+    const values = e.target.value.split(',').map(item => item.trim().toUpperCase());
+    setFormData(prev => ({
+      ...prev,
+      [field]: values
+    }));
+  };
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -204,15 +211,17 @@ const AddProductPage = () => {
               className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
-            <input
-              type="text"
+            <select
               name="category"
-              placeholder="Category"
               value={formData.category}
               onChange={handleInputChange}
               required
               className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            >
+              <option value="">Select Category</option>
+              <option value="Top Wear">Top Wear</option>
+              <option value="Bottom Wear">Bottom Wear</option>
+            </select>
 
             <select
               value={formData.gender}
@@ -224,21 +233,29 @@ const AddProductPage = () => {
               <option value="Unisex">Unisex</option>
             </select>
 
-            <input
-              type="text"
+            <select
               name="brand"
-              placeholder="Brand"
               value={formData.brand}
               onChange={handleInputChange}
+              required
               className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            >
+              <option value="" disabled>Select Brand</option>
+              <option value="Urban Threads">Urban Threads</option>
+              <option value="Modern Fit">Modern Fit</option>
+              <option value="Gucci">Gucci</option>
+              <option value="Street Style">Street Style</option>
+              <option value="Beach Breeze">Beach Breeze</option>
+              <option value="Fashion Insta">Fashion Insta</option>
+          </select>
+
 
             <input
               type="text"
               name="sizes"
               placeholder="Sizes (comma-separated)"
               value={formData.sizes.join(', ')}
-              onChange={(e) => handleArrayInput(e, 'sizes')}
+              onChange={(e) => handleeArrayInput(e, 'sizes')}
               required
               className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -263,14 +280,24 @@ const AddProductPage = () => {
               className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
-            <input
-              type="text"
-              name="material"
-              placeholder="Material"
-              value={formData.material}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+              <select
+                name="material"
+                value={formData.material}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>Select Material</option>
+                <option value="Cotton">Cotton</option>
+                <option value="Wool">Wool</option>
+                <option value="Denim">Denim</option>
+                <option value="Polyester">Polyester</option>
+                <option value="Silk">Silk</option>
+                <option value="Linen">Linen</option>
+                <option value="Viscose">Viscose</option>
+                <option value="Fleece">Fleece</option>
+              </select>
+
           </div>
 
           <textarea

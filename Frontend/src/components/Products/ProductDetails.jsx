@@ -8,6 +8,8 @@ import { addToCart } from '../../redux/slices/cartSlice';
 import { Heart, Minus, Plus, ShoppingBag, Share2 } from 'react-feather';
 import tinycolor from 'tinycolor2';
 
+const DELIVERY_CHARGE = 50; // Fixed delivery charge
+
 const ProductDetails = ({ productId }) => {
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -92,8 +94,8 @@ const ProductDetails = ({ productId }) => {
                   key={index}
                   onClick={() => setMainImage(image.url)}
                   className={`flex-shrink-0 relative w-20 h-20 rounded-lg overflow-hidden border ${
-    mainImage === image.url ? 'border-black' : 'hover:border-gray-400'
-  }`}
+                    mainImage === image.url ? 'border-black' : 'hover:border-gray-400'
+                  }`}
                 >
                   <img src={image.url} alt={image.altText} className="w-full h-full object-cover" />
                 </button>
@@ -104,7 +106,13 @@ const ProductDetails = ({ productId }) => {
           {/* Right: Product Info */}
           <div className="md:w-1/2 space-y-6">
             <h1 className="text-3xl font-bold text-gray-900">{selectedProduct.name}</h1>
-            <p className="text-xl font-semibold text-gray-900">₹{selectedProduct.price}</p>
+            
+            {/* Product Price and Delivery Charge */}
+            <div className="text-xl font-semibold text-gray-900">
+              <p>Price: ₹{selectedProduct.price}</p>
+              <p className="text-gray-600 text-sm">+ Delivery Charge: ₹{DELIVERY_CHARGE}</p>
+            </div>
+
             <p className="text-gray-600">{selectedProduct.description}</p>
 
             {/* Color Selection */}
@@ -118,8 +126,8 @@ const ProductDetails = ({ productId }) => {
                       key={color}
                       onClick={() => setSelectedColor(color)}
                       className={`w-10 h-10 rounded-full ${
-    selectedColor === color ? 'ring-2 ring-black' : 'hover:ring-2 hover:ring-gray-300'
-  }`}
+                        selectedColor === color ? 'ring-2 ring-black' : 'hover:ring-2 hover:ring-gray-300'
+                      }`}
                       style={{ backgroundColor: validColor }}
                     />
                   );
@@ -136,8 +144,8 @@ const ProductDetails = ({ productId }) => {
                     key={size}
                     onClick={() => setSelectedSize(size)}
                     className={`px-6 py-3 rounded-lg ${
-    selectedSize === size ? 'bg-black text-white' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
-  }`}
+                      selectedSize === size ? 'bg-black text-white' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                    }`}
                   >
                     {size}
                   </button>

@@ -23,6 +23,23 @@ const FilterSidebar = () => {
     const brands = ['Urban Threads', 'Modern Fit', 'Gucci', 'Street Style', 'Beach Breeze', 'Fashion Insta'];
     const genders = ['Men', 'Women'];
 
+    const clearFilters = () => {
+        setFilter({
+            category: '',
+            gender: '',
+            color: '',
+            size: [],
+            material: [],
+            brand: [],
+            minPrice: 0,
+            maxPrice: 100,
+        });
+        setPriceRange([0, 100]);
+        setSearchParam({});
+        navigate(window.location.pathname); // Reset URL to remove filters
+    };
+    
+
     useEffect(() => {
         const params = Object.fromEntries([...searchParams]);
 
@@ -200,6 +217,11 @@ const FilterSidebar = () => {
                     <span>${filter.maxPrice}</span>
                 </div>
             </div>
+            <button
+                onClick={clearFilters}
+                className="w-full mt-4 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-all">
+                Clear Filters
+            </button>
         </div>
     );
 };

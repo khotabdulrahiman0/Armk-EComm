@@ -4,17 +4,17 @@ const RazorpayButton = ({ amount, onSuccess, onError }) => {
   const handlePayment = () => {
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY,
-      amount: amount * 100, // Convert to paise
+      amount: amount * 100, 
       currency: "INR",
-      name: "Your Company",
+      name: "ARMK",
       description: "Test Transaction",
       handler: function (response) {
         onSuccess(response);
       },
       prefill: {
-        name: "Test User",
+        name: "Armk",
         email: "test@example.com",
-        contact: "9999999999",
+        contact: "9999955555",
       },
       theme: {
         color: "#3399cc",

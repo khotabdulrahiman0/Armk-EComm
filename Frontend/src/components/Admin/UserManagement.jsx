@@ -13,7 +13,7 @@ const UserManagement = () => {
   const navigate = useNavigate();
 
   const { user } = useSelector((state) => state.auth);
-  const { users = [], loading, error } = useSelector((state) => state.admin); // Ensure users is initialized
+  const { users = [], loading, error } = useSelector((state) => state.admin); 
 
   // Redirect non-admin users
   useEffect(() => {

@@ -23,6 +23,7 @@ router.post("/", protect, async (req, res) => {
                 productId: item.productId,
                 name: item.name,
                 image: item.image,
+                paymentMethod:item.paymentMethod,
                 price: item.price,
                 quantity: item.quantity,
                 size: item.size || "N/A", // Ensure size is included
@@ -40,6 +41,27 @@ router.post("/", protect, async (req, res) => {
     } catch (error) {
         console.log("Checkout session creating error", error);
         res.status(500).json({ msg: "Server error" });
+    }
+});
+
+//razorpay 
+router.post("/:id/razorpay-order", protect, async (req, res) => {
+    try {
+        const checkout = await Checkout.findById(req.params.id);
+        if (!checkout) return res.status(404).json({ msg: "Checkout not found" });
+
+        const amount = checkout.totalPrice * 100; // Convert to paise
+
+        const order = await razorpay.orders.create({
+            amount,
+            currency: "INR",
+            payment_capture: 1,
+        });
+
+        res.json({ orderId: order.id, amount: order.amount });
+    } catch (error) {
+        console.error("Razorpay Order Error:", error);
+        res.status(500).json({ error: error.message });
     }
 });
 

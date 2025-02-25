@@ -1,87 +1,91 @@
 const express = require("express");
-const User = require("../models/user");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-//Register route
-
-router.post("/register",async(req, res)=>{
-    const {name, email, password} = req.body;
+// Register route
+router.post("/register", async (req, res) => {
+    const { name, email, password } = req.body;
 
     try {
-        let user = await User.findOne({email})
+        let user = await User.findOne({ email });
 
-        if(user) return res.status(400).json({msg:"User already exists."})
+        if (user) return res.status(400).json({ msg: "User already exists." });
 
-        user = new User({name,email,password});
-        await user.save()
+        // Hash the password before saving
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        //Create jwt payload.
-        const payload =  {user:{id:user._id, role:user.role}} 
+        user = new User({ name, email, password: hashedPassword });
+        await user.save();
 
-        //sign and return the token along with user data
-        jwt.sign(payload, process.env.JWT_SECRET,{expiresIn: "24h"},(err, token)=>{
-            if(err) throw err;
+        // Create jwt payload.
+        const payload = { user: { id: user._id, role: user.role } };
 
-            //send user and token in response
+        // Sign and return the token along with user data
+        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "48h" }, (err, token) => {
+            if (err) throw err;
+
             res.status(201).json({
-                user:{
-                    _id:user._id,
-                    name:user.name,
-                    email:user.email,
-                    role:user.role,
+                user: {
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
                 },
                 token,
-            })
-        })
+            });
+        });
 
     } catch (error) {
-        console.log(error)
-        res.status(500).send("reg server error.")
+        console.error("Registration Error:", error);
+        res.status(500).json({ msg: "Server Error", error: error.message });
     }
-})
+});
 
-//login route
-router.post("/login",async (req,res) => {
-    const {email,password}=req.body;
+// Login route
+router.post("/login", async (req, res) => {
+    const { email, password } = req.body;
 
     try {
-        let user = await User.findOne({email})
-        if(!user) return res.status(400).json({msg:"Invalid credentials"})
-            const isMatch = await user.matchPassword(password);
-        if(!isMatch) return res.status(400).json({msg:"Invalid credentials"})
+        let user = await User.findOne({ email });
+        if (!user) return res.status(400).json({ msg: "Invalid credentials" });
 
-            //Create jwt payload.
-        const payload =  {user:{id:user._id, role:user.role}} 
+        // Check if password matches
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
-        //sign and return the token along with user data
-        jwt.sign(payload, process.env.JWT_SECRET,{expiresIn: "24h"},(err, token)=>{
-            if(err) throw err;
+        // Create jwt payload
+        const payload = { user: { id: user._id, role: user.role } };
 
-            //send user and token in response
+        // Sign and return the token along with user data
+        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "48h" }, (err, token) => {
+            if (err) throw err;
+
             res.json({
-                user:{
-                    _id:user._id,
-                    name:user.name,
-                    email:user.email,
-                    role:user.role,
+                user: {
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
                 },
                 token,
-            })
-        })
+            });
+        });
 
     } catch (error) {
-        console.log(error)
-        res.status(500).send("Server Error");
+        console.error("Login Error:", error);
+        res.status(500).json({ msg: "Server Error", error: error.message });
     }
-})
+});
 
-//profile page
-
-router.get("/profile",protect,async(req,res)=>{
+// Profile route
+router.get("/profile", protect, async (req, res) => {
     res.json(req.user);
-})
+});
 
 module.exports = router;
+    

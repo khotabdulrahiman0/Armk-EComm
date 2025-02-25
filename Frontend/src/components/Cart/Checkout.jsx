@@ -27,7 +27,7 @@ const Checkout = () => {
         phone: "",
     });
 
-    // Ensure cart is loaded before proceeding
+    // Redirect if cart is empty
     useEffect(() => {
         if (!cart?.products?.length) {
             navigate("/");
@@ -36,10 +36,16 @@ const Checkout = () => {
 
     const handleCreateCheckout = async (e) => {
         e.preventDefault();
+        console.log("Selected Payment Method:", paymentMethod); // ✅ Debug Log
+
 
         // Validate required fields
         if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.phone) {
             alert("Please fill all required fields.");
+            return;
+        }
+        if (!paymentMethod) {
+            alert("Please select a payment method.");
             return;
         }
 
@@ -52,9 +58,10 @@ const Checkout = () => {
                         color: item.color || "N/A"
                     })),
                     shippingAddress,
-                    paymentMethod: "PayPal",
+                    paymentMethod, // Now this is correctly set
                     totalPrice: cart.totalPrice,
                 })
+                
             );
 
             if (res.payload?._id) {
@@ -130,15 +137,11 @@ const Checkout = () => {
                     </div>
 
                     <div className="mt-6">
-                        {!checkoutId ? (
-                            <button type='submit' className='w-full bg-black text-white py-3 rounded-md font-semibold text-lg hover:bg-gray-900'>Continue to Payment</button>
-                        ) : (
-                            <div>
-                                <h3 className='text-lg font-semibold mb-4'>Choose Payment Method</h3>
-                                <button onClick={() => setPaymentMethod("razorpay")} className={`w-full py-3 rounded-md font-semibold text-lg ${paymentMethod === "razorpay" ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}>Pay with Razorpay (India)</button>
-                                <button onClick={() => setPaymentMethod("paypal")} className={`w-full py-3 rounded-md font-semibold text-lg ${paymentMethod === "paypal" ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}>Pay with PayPal (Global)</button>
-                            </div>
-                        )}
+                        <h3 className='text-lg font-semibold mb-4'>Choose Payment Method</h3>
+                        <button type="button" onClick={() => setPaymentMethod("razorpay")} className={`w-full py-3 rounded-md font-semibold text-lg ${paymentMethod === "razorpay" ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}>Pay with Razorpay (India)</button>
+                        <button type="button" onClick={() => setPaymentMethod("paypal")} className={`w-full py-3 rounded-md font-semibold text-lg ${paymentMethod === "paypal" ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}>Pay with PayPal (Global)</button>
+
+                        <button type='submit' className='w-full bg-black text-white py-3 rounded-md font-semibold text-lg hover:bg-gray-900 mt-4'>Continue to Payment</button>
                     </div>
                 </form>
             </div>
@@ -146,28 +149,19 @@ const Checkout = () => {
             {/* Right Section - Order Summary */}
             <div className="bg-gray-50 shadow-lg rounded-lg p-6">
                 <h3 className='text-lg font-semibold mb-4 text-gray-800'>Order Summary</h3>
-
-                {/* Cart Items */}
                 <div className="space-y-4">
                     {cart.products.map((item) => (
                         <div key={item._id} className="flex justify-between items-center border-b pb-4">
                             <div className="flex items-center space-x-4">
                                 <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
-                                <div>
-                                    <p className="text-gray-800 font-medium">{item.name}</p>
-                                    <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                                </div>
+                                <p className="text-gray-800 font-medium">{item.name}</p>
                             </div>
                             <p className="text-gray-800 font-medium">${(item.price * item.quantity).toFixed(2)}</p>
                         </div>
                     ))}
                 </div>
 
-                {/* Payment Buttons */}
-                <div className="mt-6">
-                    {paymentMethod === "paypal" && <PayPalButton amount={cart.totalPrice} onSuccess={handlePaymentSuccess} />}
-                    {paymentMethod === "razorpay" && <RazorpayButton amount={cart.totalPrice} onSuccess={handlePaymentSuccess} />}
-                </div>
+                {checkoutId && (paymentMethod === "paypal" ? <PayPalButton amount={cart.totalPrice} onSuccess={handlePaymentSuccess} /> : <RazorpayButton amount={cart.totalPrice} onSuccess={handlePaymentSuccess} />)}
             </div>
         </div>
     );

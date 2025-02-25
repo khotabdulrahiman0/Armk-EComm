@@ -41,7 +41,7 @@ const ProductManagement = () => {
                 <td className="p-4 font-medium text-gray-900 whitespace-nowrap">
                   {product.name}
                 </td>
-                <td className='p-4'>${product.price}</td>
+                <td className='p-4'>₹{product.price}</td>
                 <td className='p-4'>{product.sku}</td>
                 <td className='p-4'>
                   <Link to={`/admin/products/${product._id}/edit`} className='bg-yellow-500 text-white px-2 py-1 rounded mr-2 hover:bg-yellow-700'>

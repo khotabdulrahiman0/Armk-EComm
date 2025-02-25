@@ -36,7 +36,7 @@ const AdminHomePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-lg shadow-md text-center">
                     <h2 className="text-lg font-semibold text-gray-700">Total Revenue</h2>
-                    <p className="text-2xl font-bold text-green-600">${totalSales.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-green-600">₹{totalSales.toFixed(2)}</p>
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow-md text-center">
                     <h2 className="text-lg font-semibold text-gray-700">Total Orders</h2>
@@ -68,7 +68,7 @@ const AdminHomePage = () => {
                                     <tr key={order._id} className="text-center border-b">
                                         <td className="p-3 border">{order._id.slice(-6)}</td>
                                         <td className="p-3 border">{order.user.name}</td>
-                                        <td className="p-3 border">${order.totalPrice}</td>
+                                        <td className="p-3 border">₹{order.totalPrice}</td>
                                         <td className="p-3 border">{order.status}</td>
                                     </tr>
                                 ))}

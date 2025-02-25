@@ -24,7 +24,7 @@ router.get("/:id",protect,async (req,res) => {
         const order = await Order.findById(req.params.id).populate("user","name email");
 
         if(!order){
-            res.status(404).json({msg:"Order not found."});
+           return res.status(404).json({msg:"Order not found."});
         }
         res.json(order);
     } catch (error) {

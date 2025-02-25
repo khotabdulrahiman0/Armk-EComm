@@ -116,7 +116,7 @@ const OrderManagement = () => {
                         )}
                       </td>
                       <td className="py-4 px-3 font-medium text-gray-900 whitespace-nowrap">
-                        ${order.totalPrice.toFixed(2)}
+                      ₹{order.totalPrice.toFixed(2)}
                       </td>
                       <td className={`py-4 px-3 font-medium whitespace-nowrap ${getStatusColor(order.status)}`}>
                         {isFinalStatus ? (

@@ -104,7 +104,7 @@ const ProductDetails = ({ productId }) => {
           {/* Right: Product Info */}
           <div className="md:w-1/2 space-y-6">
             <h1 className="text-3xl font-bold text-gray-900">{selectedProduct.name}</h1>
-            <p className="text-xl font-semibold text-gray-900">${selectedProduct.price}</p>
+            <p className="text-xl font-semibold text-gray-900">₹{selectedProduct.price}</p>
             <p className="text-gray-600">{selectedProduct.description}</p>
 
             {/* Color Selection */}

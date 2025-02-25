@@ -114,7 +114,7 @@ const OrderConfirmationPage = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-base font-medium text-gray-900">
-                        ${(item.price * item.quantity).toFixed(2)}
+                      ₹{(item.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
                   </div>

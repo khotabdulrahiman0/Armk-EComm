@@ -83,7 +83,7 @@ const GenderCollectionSection = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 text-center">
           <div>
             <p className="font-medium mb-1">Free Shipping</p>
-            <p className="text-sm text-neutral-600">On orders over $100</p>
+            <p className="text-sm text-neutral-600">On orders over ₹499</p>
           </div>
           <div>
             <p className="font-medium mb-1">Secure Payment</p>
@@ -91,7 +91,7 @@ const GenderCollectionSection = () => {
           </div>
           <div>
             <p className="font-medium mb-1">Free Returns</p>
-            <p className="text-sm text-neutral-600">30-day return policy</p>
+            <p className="text-sm text-neutral-600">7-day return policy</p>
           </div>
           <div>
             <p className="font-medium mb-1">Customer Support</p>

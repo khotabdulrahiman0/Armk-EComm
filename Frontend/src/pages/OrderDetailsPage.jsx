@@ -115,7 +115,7 @@ const OrderDetailsPage = () => {
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Order Summary</h3>
                         <div className="space-y-1 text-sm text-gray-600">
                             <p>Items: {orderDetails.orderItems.length}</p>
-                            <p className="font-medium">Total: ${orderDetails.totalPrice}</p>
+                            <p className="font-medium">Total: ₹{orderDetails.totalPrice}</p>
                         </div>
                     </div>
                 </div>

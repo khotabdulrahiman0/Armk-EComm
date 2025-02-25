@@ -107,7 +107,7 @@ const MyOrdersPage = () => {
                     </div>
                     <div className="sm:text-right">
                       <p className="text-lg font-semibold text-gray-900">
-                        ${order.totalPrice}
+                      ₹{order.totalPrice}
                       </p>
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -175,7 +175,7 @@ const MyOrdersPage = () => {
                               </div>
                               <div className="flex items-center gap-2">
                                 <span>Price:</span>
-                                <span className="font-medium">${item.price}</span>
+                                <span className="font-medium">₹{item.price}</span>
                               </div>
                             </div>
                           </div>

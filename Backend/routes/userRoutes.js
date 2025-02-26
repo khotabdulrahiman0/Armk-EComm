@@ -181,6 +181,68 @@ router.post("/login", async (req, res) => {
     }
 });
 
+router.post("/forgot-password/request-otp", async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ msg: "Email is required" });
+    }
+
+    try {
+        const user = await User.findOne({ email, isVerified: true });
+
+        if (!user) {
+            return res.status(404).json({ msg: "User not found or not verified" });
+        }
+
+        // Generate OTP for password reset
+        const otp = user.generateOTP();
+        await user.save();
+
+        // Send OTP via email
+        await sendOTP(email, otp);
+
+        res.status(200).json({ msg: "OTP sent to your email", email });
+    } catch (error) {
+        console.error("Forgot Password OTP Error:", error);
+        res.status(500).json({ msg: "Server Error", error: error.message });
+    }
+});
+
+// Forgot Password - Verify OTP & Reset Password
+router.post("/forgot-password/reset", async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+        return res.status(400).json({ msg: "All fields are required" });
+    }
+
+    try {
+        const user = await User.findOne({ email, isVerified: true });
+
+        if (!user) {
+            return res.status(404).json({ msg: "User not found or not verified" });
+        }
+
+        // Verify OTP
+        if (!user.verifyOTP(otp)) {
+            return res.status(400).json({ msg: "Invalid or expired OTP" });
+        }
+
+        // Update password and clear OTP
+        user.password = newPassword; // Will be hashed by pre-save middleware
+        user.otp = undefined;
+        user.otpExpiry = undefined;
+
+        await user.save();
+
+        res.status(200).json({ msg: "Password reset successful. You can now log in." });
+    } catch (error) {
+        console.error("Password Reset Error:", error);
+        res.status(500).json({ msg: "Server Error", error: error.message });
+    }
+});
+
 // Profile route
 router.get("/profile", protect, async (req, res) => {
     res.json(req.user);

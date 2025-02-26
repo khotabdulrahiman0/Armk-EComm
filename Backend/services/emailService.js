@@ -9,6 +9,46 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+/**
+ * Sends an OTP to the user's email for either verification or password reset.
+ * @param {string} email - The recipient's email address.
+ * @param {string} otp - The generated OTP code.
+ * @param {string} purpose - The purpose of the OTP ("verification" or "reset").
+ */
+async function sendOTP(email, otp, purpose = "verification") {
+    const subject =
+        purpose === "reset"
+            ? "Reset Your Password - OTP Verification"
+            : "Verify Your Account - OTP Code";
+
+    const message =
+        purpose === "reset"
+            ? `Use the following OTP to reset your password:`
+            : `Your One-Time Password (OTP) for account verification is:`;
+
+    try {
+        await transporter.sendMail({
+            from: `"Armk" <${process.env.EMAIL}>`,
+            to: email,
+            subject,
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+                    <h2 style="color: #333;">${subject}</h2>
+                    <p style="font-size: 16px; color: #555;">${message}</p>
+                    <h3 style="color: #008000; font-size: 24px; text-align: center;">${otp}</h3>
+                    <p style="font-size: 14px; color: #777;">This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
+                    <hr style="border: none; border-top: 1px solid #ddd;">
+                    <p style="font-size: 14px; color: #777;">Thank you!<br> <strong>Your App Team</strong></p>
+                </div>
+            `,
+        });
+        console.log(`OTP sent for ${purpose} to ${email}`);
+    } catch (error) {
+        console.error(`Error sending OTP for ${purpose} to ${email}:`, error);
+        throw new Error(`Error sending OTP for ${purpose}`);
+    }
+}
+
 // Generic function to send emails
 async function sendEmail(to, subject, message) {
     try {
@@ -72,29 +112,29 @@ async function sendOrderConfirmation(user, order) {
     }
 }
 
-// Send OTP email with a better design
-async function sendOTP(email, otp) {
-    try {
-        let info = await transporter.sendMail({
-            from: `"Your App" <${process.env.EMAIL}>`,
-            to: email,
-            subject: "Your OTP Code for Verification",
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-                    <h2 style="color: #333;">Email Verification</h2>
-                    <p style="font-size: 16px; color: #555;">Your One-Time Password (OTP) for verification is:</p>
-                    <h3 style="color: #008000; font-size: 24px; text-align: center;">${otp}</h3>
-                    <p style="font-size: 14px; color: #777;">This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
-                    <hr style="border: none; border-top: 1px solid #ddd;">
-                    <p style="font-size: 14px; color: #777;">Thank you for registering!<br> <strong>Your App Team</strong></p>
-                </div>
-            `,
-        });
-        console.log("OTP sent:", info.response);
-    } catch (error) {
-        console.error("Error sending OTP:", error);
-        throw new Error("Error sending OTP");
-    }
-}
+// // Send OTP email with a better design
+// async function sendOTP(email, otp) {
+//     try {
+//         let info = await transporter.sendMail({
+//             from: `"Your App" <${process.env.EMAIL}>`,
+//             to: email,
+//             subject: "Your OTP Code for Verification",
+//             html: `
+//                 <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+//                     <h2 style="color: #333;">Email Verification</h2>
+//                     <p style="font-size: 16px; color: #555;">Your One-Time Password (OTP) for verification is:</p>
+//                     <h3 style="color: #008000; font-size: 24px; text-align: center;">${otp}</h3>
+//                     <p style="font-size: 14px; color: #777;">This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
+//                     <hr style="border: none; border-top: 1px solid #ddd;">
+//                     <p style="font-size: 14px; color: #777;">Thank you for registering!<br> <strong>Your App Team</strong></p>
+//                 </div>
+//             `,
+//         });
+//         console.log("OTP sent:", info.response);
+//     } catch (error) {
+//         console.error("Error sending OTP:", error);
+//         throw new Error("Error sending OTP");
+//     }
+// }
 
 module.exports = { sendOTP, sendEmail , sendOrderConfirmation };

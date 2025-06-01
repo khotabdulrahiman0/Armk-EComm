@@ -1,16 +1,21 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchOrderDetails } from '../redux/slices/orderSlice';
 
 const OrderDetailsPage = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { orderDetails, loading, error } = useSelector((state) => state.orders);
 
     useEffect(() => {
         dispatch(fetchOrderDetails(id));
     }, [dispatch, id]);
+
+    const handleViewInvoice = () => {
+        navigate(`/invoice/${id}`);
+    };
 
     if (loading) return (
         <div className="flex justify-center items-center h-screen">
@@ -53,9 +58,21 @@ const OrderDetailsPage = () => {
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
             <div className="mb-8">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Order Details</h1>
-                <Link to="/my-orders" className="text-blue-600 hover:underline mt-2 inline-block">
-                    &larr; Back to Orders
-                </Link>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
+                    <Link to="/my-orders" className="text-blue-600 hover:underline inline-block">
+                        &larr; Back to Orders
+                    </Link>
+                    {/* New Invoice Button */}
+                    <button 
+                        onClick={handleViewInvoice}
+                        className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center gap-2 self-start"
+                    >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        View Invoice
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -92,6 +109,7 @@ const OrderDetailsPage = () => {
                     </div>
                 </div>
 
+                {/* Rest of the component stays the same... */}
                 {/* Order Items */}
                 <div className="p-6 border-b border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>

@@ -67,7 +67,7 @@ const AdminHomePage = () => {
                                 {orders.slice(0, 5).map(order => (
                                     <tr key={order._id} className="text-center border-b">
                                         <td className="p-3 border">{order._id.slice(-6)}</td>
-                                        <td className="p-3 border">{order.user.name}</td>
+                                        <td className="p-3 border">{order.user ? order.user.name : 'N/A'}</td>
                                         <td className="p-3 border">₹{order.totalPrice}</td>
                                         <td className="p-3 border">{order.status}</td>
                                     </tr>

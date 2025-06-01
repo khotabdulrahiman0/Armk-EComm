@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const FilterSidebar = () => {
-    const [searchParams, setSearchParam] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     const [filter, setFilter] = useState({
         category: '',
@@ -14,7 +14,6 @@ const FilterSidebar = () => {
         minPrice: 0,
         maxPrice: 100,
     });
-    const [priceRange, setPriceRange] = useState([0, 100]);
 
     const categories = ['Top Wear', 'Bottom Wear'];
     const colors = ['Red', 'Blue', 'Black', 'Green', 'Yellow', 'Gray', 'White', 'Pink', 'Beige', 'Navy'];
@@ -34,26 +33,25 @@ const FilterSidebar = () => {
             minPrice: 0,
             maxPrice: 100,
         });
-        setPriceRange([0, 100]);
-        setSearchParam({});
-        navigate(window.location.pathname); // Reset URL to remove filters
+        
+        // Clear all search params but preserve the current path
+        navigate(window.location.pathname);
     };
     
-
     useEffect(() => {
-        const params = Object.fromEntries([...searchParams]);
-
-        setFilter({
-            category: params.category || '',
-            gender: params.gender || '',
-            color: params.color || '',
-            size: params.size ? params.size.split(',') : [],
-            material: params.material ? params.material.split(',') : [],
-            brand: params.brand ? params.brand.split(',') : [],
-            minPrice: params.minPrice || 0,
-            maxPrice: params.maxPrice || 100,
-        });
-        setPriceRange([0, params.maxPrice || 100]);
+        // Initialize filters from URL parameters
+        const newFilters = {
+            category: searchParams.get('category') || '',
+            gender: searchParams.get('gender') || '',
+            color: searchParams.get('color') || '',
+            size: searchParams.get('size') ? searchParams.get('size').split(',') : [],
+            material: searchParams.get('material') ? searchParams.get('material').split(',') : [],
+            brand: searchParams.get('brand') ? searchParams.get('brand').split(',') : [],
+            minPrice: searchParams.get('minPrice') || 0,
+            maxPrice: searchParams.get('maxPrice') || 100,
+        };
+        
+        setFilter(newFilters);
     }, [searchParams]);
 
     const handleFilterChange = (e) => {
@@ -66,6 +64,9 @@ const FilterSidebar = () => {
             } else {
                 newFilters[name] = newFilters[name].filter((item) => item !== value);
             }
+        } else if (name === "color") {
+            // Handle color selection (toggle on/off)
+            newFilters[name] = newFilters[name] === value ? '' : value;
         } else {
             newFilters[name] = value;
         }
@@ -75,16 +76,37 @@ const FilterSidebar = () => {
     };
 
     const updateURLParams = (newFilters) => {
+        // Create a new URLSearchParams object
         const params = new URLSearchParams();
-        Object.keys(newFilters).forEach((key) => {
-            if (Array.isArray(newFilters[key]) && newFilters[key].length > 0) {
-                params.append(key, newFilters[key].join(','));
-            } else if (newFilters[key]) {
-                params.append(key, newFilters[key]);
-            }
-        });
-        setSearchParam(params);
-        navigate(`?${params.toString()}`);
+        
+        // Only add non-empty parameters
+        if (newFilters.category) params.set('category', newFilters.category);
+        if (newFilters.gender) params.set('gender', newFilters.gender);
+        if (newFilters.color) params.set('color', newFilters.color);
+        
+        if (newFilters.size && newFilters.size.length > 0) 
+            params.set('size', newFilters.size.join(','));
+        
+        if (newFilters.material && newFilters.material.length > 0) 
+            params.set('material', newFilters.material.join(','));
+        
+        if (newFilters.brand && newFilters.brand.length > 0) 
+            params.set('brand', newFilters.brand.join(','));
+        
+        if (newFilters.minPrice && newFilters.minPrice > 0) 
+            params.set('minPrice', newFilters.minPrice);
+        
+        if (newFilters.maxPrice && newFilters.maxPrice < 100) 
+            params.set('maxPrice', newFilters.maxPrice);
+        
+        // Preserve sortBy parameter if it exists
+        const sortBy = searchParams.get('sortBy');
+        if (sortBy) params.set('sortBy', sortBy);
+        
+        // Use direct URL construction to avoid encoding issues
+        const queryString = params.toString();
+        const url = window.location.pathname + (queryString ? `?${queryString}` : '');
+        navigate(url);
     };
 
     return (
@@ -134,10 +156,17 @@ const FilterSidebar = () => {
                     {colors.map((color) => (
                         <button
                             key={color}
-                            value={color}
-                            onClick={handleFilterChange}
-                            name="color"
-                            className={`w-8 h-8 rounded-full border-2 border-gray-200 hover:border-gray-400 transition-all ${filter.color == color ? "ring-2 ring-blue-500" : ""}`}
+                            onClick={() => {
+                                // Create a mock event object
+                                const mockEvent = {
+                                    target: {
+                                        name: 'color',
+                                        value: color
+                                    }
+                                };
+                                handleFilterChange(mockEvent);
+                            }}
+                            className={`w-8 h-8 rounded-full border-2 border-gray-200 hover:border-gray-400 transition-all ${filter.color === color ? "ring-2 ring-blue-500" : ""}`}
                             style={{ backgroundColor: color.toLowerCase() }}
                         ></button>
                     ))}

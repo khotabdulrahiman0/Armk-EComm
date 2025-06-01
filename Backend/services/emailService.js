@@ -38,7 +38,7 @@ async function sendOTP(email, otp, purpose = "verification") {
                     <h3 style="color: #008000; font-size: 24px; text-align: center;">${otp}</h3>
                     <p style="font-size: 14px; color: #777;">This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
                     <hr style="border: none; border-top: 1px solid #ddd;">
-                    <p style="font-size: 14px; color: #777;">Thank you!<br> <strong>Your App Team</strong></p>
+                    <p style="font-size: 14px; color: #777;">Thank you!<br> <strong>Armk and Team</strong></p>
                 </div>
             `,
         });
@@ -53,7 +53,7 @@ async function sendOTP(email, otp, purpose = "verification") {
 async function sendEmail(to, subject, message) {
     try {
         let info = await transporter.sendMail({
-            from: `"Your Store" <${process.env.EMAIL}>`,
+            from: `"Armk" <${process.env.EMAIL}>`,
             to,
             subject,
             html: `
@@ -61,7 +61,7 @@ async function sendEmail(to, subject, message) {
                     <h2 style="color: #333;">Hello,</h2>
                     <p style="font-size: 16px; color: #555;">${message}</p>
                     <hr style="border: none; border-top: 1px solid #ddd;">
-                    <p style="font-size: 14px; color: #777;">Thank you for shopping with us!<br> <strong>Your Store Team</strong></p>
+                    <p style="font-size: 14px; color: #777;">Thank you for shopping with us!<br> <strong>Armk and Team</strong></p>
                 </div>
             `,
         });
@@ -116,7 +116,7 @@ async function sendOrderConfirmation(user, order) {
 // async function sendOTP(email, otp) {
 //     try {
 //         let info = await transporter.sendMail({
-//             from: `"Your App" <${process.env.EMAIL}>`,
+//             from: `"Armk " <${process.env.EMAIL}>`,
 //             to: email,
 //             subject: "Your OTP Code for Verification",
 //             html: `

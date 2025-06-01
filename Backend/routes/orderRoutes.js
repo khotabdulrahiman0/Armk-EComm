@@ -4,9 +4,12 @@ const Checkout = require("../models/Checkout");
 const Product = require("../models/products");
 const Order = require("../models/Order");
 const { protect } = require("../middleware/authMiddleware");
+const { getInvoiceByOrderId } = require("../controllers/orderController");
 
 
 const router = express.Router();
+
+router.get('/:id/invoice', getInvoiceByOrderId);
 
 // get orders
 router.get("/my-orders",protect,async (req,res) => {

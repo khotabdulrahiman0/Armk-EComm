@@ -13,15 +13,26 @@ const CollectionPage = () => {
     const dispatch = useDispatch();
     
     const { products, loading, error } = useSelector((state) => state.products);
-    const queryParams = Object.fromEntries([...searchParams]);
     
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const sidebarRef = useRef(null);
 
     useEffect(() => {
-        console.log("Fetching products with:", { collection, ...queryParams });
-        dispatch(fetchProductsByFilters({ collection, ...queryParams }));
-    }, [dispatch, collection, JSON.stringify(queryParams)]); // ✅ Prevent infinite re-renders
+        // Convert search params to an object properly
+        const filters = {};
+        searchParams.forEach((value, key) => {
+            // Only add parameters with actual values
+            if (value) {
+                filters[key] = value;
+            }
+        });
+
+        // Add collection to filters if it exists
+        const requestFilters = collection ? { collection, ...filters } : filters;
+        
+        console.log("Fetching products with filters:", requestFilters);
+        dispatch(fetchProductsByFilters(requestFilters));
+    }, [dispatch, collection, searchParams]);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -38,7 +49,7 @@ const CollectionPage = () => {
 
     return (
         <div className="flex flex-col lg:flex-row">
-            <button onClick={toggleSidebar} className="lg:hidden border p-2 flex justify-center items-center">
+            <button onClick={toggleSidebar} className="lg:hidden border p-2 flex justify-center items-center mb-4">
                 <FaFilter className="mr-2" /> Filters
             </button>
 
@@ -47,7 +58,7 @@ const CollectionPage = () => {
             </div>
 
             <div className="flex-grow p-4">
-                <h2 className="text-2xl uppercase mb-4">All Collection</h2>
+                <h2 className="text-2xl uppercase mb-4">{collection === 'all' ? 'All Collection' : collection}</h2>
                 <SortOptions />
                 
                 {loading ? (

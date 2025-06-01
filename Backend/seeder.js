@@ -1,46 +1,28 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const Product = require("./models/products");
-const User = require("./models/user");
-const products = require('./data/products')
-const Cart = require("./models/cart");
+const products = require('./data/products'); // Assuming products data is imported here
 
 dotenv.config();
 
 // mongo conn.
 mongoose.connect(process.env.MONGO_URI);
 
-//function to seed data
+// Function to seed product data
 const seedData = async () => {
     try {
-        //clear existing data
+        // Clear existing product data
         await Product.deleteMany();
-        await User.deleteMany();
-        await Cart.deleteMany();
 
-        //create a admin user
-        const createdUser = await User.create({
-            name:"Admin user",
-            email:"admin@example.com",
-            password:"qwertyui",
-            role:"admin",
-        });
+        // Insert products into the database
+        await Product.insertMany(products);
 
-        // assign a default id to the product
-        const userID = createdUser._id;
-
-        const sampleProducts = products.map((product)=>{
-            return {...product, user:userID};
-        })
-
-        // insert product into db
-        await Product.insertMany(sampleProducts);
-        console.log("product data seeded successfully");
+        console.log("Product data seeded successfully");
         process.exit();
-
     } catch (error) {
-        console.log("Error seeding the data",error);
-        process.exit(1)
+        console.log("Error seeding the data", error);
+        process.exit(1);
     }
 };
-seedData()
+
+seedData();

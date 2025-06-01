@@ -56,7 +56,7 @@ const checkoutSchema = new mongoose.Schema({
     paymentMethod: {
         type: String,
         required: true,
-        enum: ["COD", "paypal", "razorpay"], // Limits to valid methods
+        enum: ["COD", "paypal", "razorpay"], 
     },
     totalPrice:{
         type:Number,
@@ -74,7 +74,7 @@ const checkoutSchema = new mongoose.Schema({
         default: "Pending",
     },
     paymentDetails: {
-        type: mongoose.Schema.Types.Mixed, // Allows Razorpay, Stripe, etc.
+        type: mongoose.Schema.Types.Mixed, 
         default: {},
     },
     isFinalized:{

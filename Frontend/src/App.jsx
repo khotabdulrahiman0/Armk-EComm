@@ -24,6 +24,8 @@ import store from "./redux/store"
 import ProtectedRoute from "./components/Common/ProtectedRoute";
 import AddProductPage from "./components/Admin/AddProductPage";
 import AdminOrdersDetailPage from "./pages/AdminOrdersDeatailPage";
+import ForgotPassword from "./components/Common/ForgotPassword";
+import InvoicePage from "./components/Common/InvoiceComponent";
 
 const App = () => {
   return (
@@ -42,7 +44,9 @@ const App = () => {
     <Route path="/checkout/razorpay" element={<RazorpayCheckout />} />
     <Route path='/order-confirmation' element={<OrderConfirmationPage />}/>
     <Route path='/order/:id' element={<OrderDetailsPage />}/>
+    <Route path="/invoice/:id" element={<InvoicePage />} />
     <Route path='/my-orders' element={<MyOrdersPage />}/>
+    <Route path='/forgot-password' element={<ForgotPassword />}/>
   </Route>
 
   {/* Admin Routes - Fixed */}

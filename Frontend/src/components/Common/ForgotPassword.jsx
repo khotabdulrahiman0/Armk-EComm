@@ -23,7 +23,7 @@ const ForgotPassword = () => {
         setError("");
         
         try {
-            const response = await axios.post("/api/users/forgot-password/request-otp", { email });
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/forgot-password/request-otp`, { email });
             setSuccess(response.data.msg);
             setStep(2);
         } catch (error) {
@@ -45,7 +45,7 @@ const ForgotPassword = () => {
         setError("");
         
         try {
-            const response = await axios.post("/api/users/forgot-password/reset", {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/forgot-password/reset`, {
                 email,
                 otp,
                 newPassword
@@ -71,7 +71,7 @@ const ForgotPassword = () => {
         setSuccess("");
         
         try {
-            const response = await axios.post("/api/users/forgot-password/request-otp", { email });
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/forgot-password/request-otp`, { email });
             setSuccess("New OTP sent to your email");
         } catch (error) {
             setError(error.response?.data?.msg || "Failed to resend OTP. Please try again.");

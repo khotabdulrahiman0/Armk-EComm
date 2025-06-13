@@ -28,7 +28,7 @@ A full-featured eCommerce web application built using the **MERN stack** (MongoD
 
 ## 📷 Screenshots
 
-_Add a few screenshots here showing the homepage, product list, cart, admin panel, etc._
+
 
 ## 📁 Folder Structure
 
@@ -44,7 +44,6 @@ server/ # Node.js backend
 
 1. Clone the repository
 
-```bash
 git clone https://github.com/khotabdulrahiman0/ecommerce-website.git
 cd ecommerce-website
 

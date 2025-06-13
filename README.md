@@ -73,3 +73,6 @@ EMAIL=your_email
 EMAIL_PASSWORD=your_email_password
 
 
+🙋‍♂️ Author
+Abdul Rahiman Khot
+LinkedIn • GitHub
